@@ -1,0 +1,41 @@
+{
+  "programs": {
+    "0": {
+      "file": "whoosh.wav",
+      "root_note": 60,
+      "loop": true
+    },
+    "33": {
+      "file": "clang.wav",
+      "root_note": 60,
+      "loop": true
+    },
+    "34": {
+      "file": "bass.wav",
+      "root_note": 60,
+      "loop": true
+    },
+    "37": {
+      "file": "hi-hat.wav",
+      "root_note": 60,
+      "loop": true
+    },
+    "39": {
+      "file": "kick.wav",
+      "root_note": 60,
+      "loop": true
+    },
+    "48": {
+      "file": "snare.wav",
+      "root_note": 60,
+      "loop": true
+    }
+  },
+  "drums": {
+    "36": "bass.wav",
+    "37": "snare.wav",
+    "39": "hi-hat.wav",
+    "43": "kick.wav",
+    "50": "hi-hat.wav"
+  }
+}
