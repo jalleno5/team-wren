@@ -1,0 +1,32 @@
+file,duration,top1,top1_score,top2,top2_score,top3,top3_score
+Bottle_01.wav,3.16,Cowbell,0.24,Percussion,0.19,Wood block,0.18
+Bottle_02.wav,3.99,Percussion,0.27,Musical instrument,0.2,Cowbell,0.17
+Bottle_03.wav,1.45,"Dishes, pots, and pans",0.21,"Cutlery, silverware",0.18,Percussion,0.15
+Clap_01.wav,3.56,Wood,0.21,Chopping (food),0.21,Chop,0.2
+Clap_02.wav,4.03,Chop,0.33,Wood,0.29,"Whack, thwack",0.13
+Clap_03.wav,1.3,"Inside, small room",0.23,Wood,0.18,Hands,0.17
+Coins_01.wav,3.03,Rattle (instrument),0.45,Maraca,0.29,Percussion,0.26
+Coins_02.wav,4.01,"Inside, small room",0.32,Tearing,0.28,"Crumpling, crinkling",0.19
+Coins_03.wav,1.51,Rattle (instrument),0.38,Music,0.37,Maraca,0.26
+Keys_01.wav,4.35,Coin (dropping),0.63,Glass,0.36,Keys jangling,0.31
+Keys_02.wav,3.63,"Crumpling, crinkling",0.31,Glass,0.22,"Chink, clink",0.2
+Keys_03.wav,1.56,"Crumpling, crinkling",0.44,Tearing,0.39,"Inside, small room",0.32
+Knock_01.wav,3.26,Knock,0.75,Door,0.45,Tap,0.2
+Knock_02.wav,3.39,Knock,0.23,Wood block,0.23,Chopping (food),0.21
+Knock_03.wav,1.34,Wood,0.6,Chop,0.6,Hammer,0.46
+Paper_01.wav,2.97,"Crumpling, crinkling",0.46,Crack,0.44,Crackle,0.19
+Paper_02.wav,3.37,"Crumpling, crinkling",0.6,Crack,0.43,Tearing,0.26
+Paper_03.wav,1.15,Coin (dropping),0.62,Crack,0.58,Shuffling cards,0.29
+Pen_01.wav,3.5,Coin (dropping),0.51,Glass,0.39,Scissors,0.34
+Pen_02.wav,3.22,Scissors,0.73,Coin (dropping),0.43,Glass,0.3
+Pen_03.wav,1.47,Coin (dropping),0.44,Silence,0.32,Scissors,0.32
+Snap_01.wav,3.39,Hands,0.44,Finger snapping,0.42,"Inside, small room",0.23
+Snap_02.wav,3.58,Finger snapping,0.6,Hands,0.45,"Inside, small room",0.22
+Snap_03.wav,1.6,Hands,0.37,Finger snapping,0.2,"Inside, small room",0.17
+Water_01.wav,3.2,Fill (with liquid),0.35,Water,0.27,Liquid,0.25
+Water_02.wav,3.71,Drip,0.53,Liquid,0.42,Water,0.39
+Water_03.wav,1.54,Silence,0.33,Water,0.32,Liquid,0.21
+Water_noisy.wav,3.86,"Inside, small room",0.26,Liquid,0.21,Drip,0.2
+Zipper_01.wav,3.56,Zipper (clothing),0.17,Sneeze,0.15,Fart,0.14
+Zipper_02.wav,4.22,Zipper (clothing),0.49,Fart,0.42,Scrape,0.17
+Zipper_03.wav,1.07,Silence,0.49,Sneeze,0.45,"Inside, small room",0.12
