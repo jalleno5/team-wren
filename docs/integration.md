@@ -15,8 +15,8 @@ Encore keeps production integrations behind the interfaces in `src/services.ts`.
 | Screen | Future responsibilities |
 | --- | --- |
 | Login | Replace `AuthService` with a Supabase client adapter. `signInWithGoogle` should call `supabase.auth.signInWithOAuth({ provider: 'google' })`; `signOut` should call `supabase.auth.signOut()`. |
-| Library | Replace `SoundService` with API calls for list/playback URLs, upload, deletion, visibility, and reports. Upload receives the browser-recorded `Blob`. |
-| Parameters | Implement `BeatService.generate`; return a stable beat ID only when generation is accepted. |
+| Library | The included adapter reads `sounds`, uploads blobs to the configured Storage bucket, updates sound visibility, and inserts moderation requests into `sound_flags`. |
+| Parameters | Implement `BeatService.generate`; its parameter payload includes `lengthBars` (1, 2, or 4), and it returns a stable beat ID only when generation is accepted. |
 | Audio output | Implement `getOutput` with `{ id, name, audioUrl, durationSeconds, waveform, downloadUrl }`. URLs may be signed and short-lived. |
 | Profile | Implement `ProfileService` for profile reads, edits, and photo upload. |
 
@@ -25,6 +25,22 @@ Keep the exported interfaces stable when adding production adapters. Reads may r
 ## Browser recording lifecycle
 
 The recorder requests microphone permission before the countdown, displays 3–2–1, records for 1.5 seconds, stops every media track, and creates a temporary object URL for review. Closing, retrying, or unmounting clears timers, stops tracks, and revokes the object URL. The object URL is not persistence; the production upload adapter must send the supplied blob and return the created sound.
+
+Before saving, the review screen exposes draggable handles on both edges of the waveform. The handles support pointer and arrow-key input. The selected values are sent as `trim_start_seconds` and `trim_end_seconds`, stored with the sound row, and honored by sample playback.
+
+## Guest access
+
+Choosing guest mode stores a session-scoped access flag. Guest sessions are restricted to public sounds; attempts to open the private library, record a sound, or export an MP3 produce a sign-in dialog. A successful production Google sign-in must replace the flag with `member` before routing to the library.
+
+## Supabase table contract
+
+Copy `.env.example` to `.env.local` and provide `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to activate the REST adapter. The configured project must expose:
+
+- `sounds`: `id`, `name`, `creator`, `owned`, `visibility`, `waveform`, `audio_url`, `trim_start_seconds`, `trim_end_seconds`, and `created_at`.
+- `sound_flags`: `id`, `sound_id`, `reason`, `status`, and `created_at`.
+- A public or appropriately signed Storage bucket matching `VITE_SUPABASE_SOUND_BUCKET` (defaults to `sounds`).
+
+Row-level security should allow visitors to select public sounds, authenticated owners to select/update their sounds, and authenticated users to insert flags. Do not expose a service-role key to Vite; the frontend adapter is designed for an anon key plus RLS.
 
 Fermata's conditioning vocabulary is represented as select-menu options only. The fixed pattern is an illustration, not model output. There is no model execution, MIDI/audio conversion, or sound classification.
 

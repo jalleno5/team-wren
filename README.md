@@ -25,6 +25,14 @@ Open the printed localhost URL. Authentication and backend operations use explic
 
 Screen navigation, transient library selection, local fixture search, disclosure panels, info tooltips, and responsive layouts are included. Microphone recording requests browser permission, counts down from three, captures 1.5 seconds with `MediaRecorder`, and provides a local review player before the upload adapter is called. The beat page presents the generated-audio contract as a waveform player and enables playback/export when a future service supplies URLs.
 
+Recorded sounds can be trimmed by dragging the left and right edges of the waveform before saving; the handles also support arrow-key adjustment. When the Supabase variables in `.env.example` are configured, the library is populated from the `sounds` table and sample flags are inserted into `sound_flags`; otherwise the fixture-backed prototype and explicit not-configured messages remain visible.
+
+The sign-in screen also offers guest mode. Guests can browse and select community sounds and generate/listen to a beat, while private sounds, recording, and MP3 export open a sign-in prompt.
+
+During `npm run dev`, the sign-in page includes a clearly labeled testing bypass that starts a member-mode session. Vite removes this control from production builds.
+
+Beat parameters include a selectable 1-, 2-, or 4-bar length that is sent to the generation service as `lengthBars`.
+
 ## Not implemented
 
 There is no real authentication, persistence, server upload, sharing, deletion, moderation, beat generation, or MP3 export. Those controls call typed adapters in `src/services.ts`, which reject with `ServiceNotConfiguredError`. Recorded browser audio exists only as a temporary object URL until a production upload adapter is installed.
