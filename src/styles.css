@@ -1,8 +1,8 @@
 /* Encore UI styles. Rule order preserves the existing responsive cascade. */
 
 :root {
-  --font-body: 'Nunito',sans-serif;
-  --font-display: 'Fredoka',sans-serif;
+  --font-body: 'Inter',sans-serif;
+  --font-display: 'Inter',sans-serif;
   --font-mono: 'SFMono-Regular',Consolas,'Liberation Mono',monospace;
   font-synthesis: none;
 }
@@ -961,6 +961,200 @@ input[type=range] {
 
 }
 
+/* Audio output, recording states, and final typography refinements. */
+.workflow-step>a {
+  min-height: 72px;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.workflow-step>a>span {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+
+.workflow-step>svg {
+  top: 20px;
+  width: 24px;
+  height: 24px;
+}
+
+.service-message {
+  margin-top: 14px;
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.service-message.error {
+  background: #ffe3dc;
+  color: #842c20;
+  border-left: 3px solid #c84431;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.countdown-number {
+  font-family: var(--font-mono) !important;
+  font-size: 64px !important;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.recording-pulse {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #c84431;
+  box-shadow: 0 0 0 0 #c8443166;
+  animation: recording-pulse 1s infinite;
+}
+
+@keyframes recording-pulse {
+  70% { box-shadow: 0 0 0 16px #c8443100; }
+  100% { box-shadow: 0 0 0 0 #c8443100; }
+}
+
+.recording-preview {
+  width: min(100%,360px);
+}
+
+.output-page {
+  max-width: 1180px;
+}
+
+.audio-output-card {
+  background: #e1e9fb;
+  padding: clamp(24px,4vw,48px);
+}
+
+.audio-output-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.audio-output-heading h2 {
+  margin-top: 7px;
+  font-size: clamp(27px,4vw,42px);
+  font-weight: 600;
+  letter-spacing: -.8px;
+}
+
+.eyebrow {
+  color: #43577e;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.output-waveform {
+  height: clamp(150px,24vw,245px);
+  margin: 42px 0 30px;
+  display: flex;
+  align-items: center;
+  gap: clamp(2px,.42vw,6px);
+  padding: 22px;
+  background: #f8faff;
+  overflow: hidden;
+}
+
+.output-waveform span {
+  flex: 1;
+  min-width: 2px;
+  max-width: 11px;
+  background: #9badd0;
+  transition: background .15s;
+}
+
+.output-waveform span.played {
+  background: #2345c8;
+}
+
+.audio-controls {
+  display: grid;
+  grid-template-columns: 48px auto minmax(120px,1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.audio-controls .transport-play {
+  width: 48px;
+  height: 48px;
+  border: 0;
+}
+
+.audio-time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #37445f;
+}
+
+.output-empty {
+  margin-top: 22px;
+  padding: 14px 16px;
+  background: #f8faff;
+  color: #52617b;
+  font-size: 13px;
+}
+
+@media (max-width:700px) {
+  .workflow-step>a {
+    min-height: 66px;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .workflow-step>a>span {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+
+  .workflow-step>svg {
+    top: 18px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .audio-output-heading {
+    flex-direction: column;
+  }
+
+  .audio-output-heading .button {
+    width: 100%;
+  }
+
+  .output-waveform {
+    margin: 28px 0 22px;
+    padding: 14px;
+  }
+
+  .audio-controls {
+    grid-template-columns: 44px auto 1fr auto;
+    gap: 9px;
+  }
+
+  .audio-controls .transport-play {
+    width: 44px;
+    height: 44px;
+  }
+}
+
 @media (max-width:370px) {
   .page {
     padding-left: 15px;
@@ -1075,6 +1269,45 @@ input[type=range] {
     font-size: 48px;
   }
 
+}
+
+/* Keep the compact workflow sizing last in the cascade. */
+.workflow-step>a {
+  min-height: 72px;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.workflow-step>a>span {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+
+.workflow-step>svg {
+  top: 20px;
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width:700px) {
+  .workflow-step>a {
+    min-height: 66px;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .workflow-step>a>span {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+
+  .workflow-step>svg {
+    top: 18px;
+    width: 20px;
+    height: 20px;
+  }
 }
 
 @media (max-width:370px) {
@@ -3496,4 +3729,43 @@ input::placeholder {
     height: 26px;
   }
 
+}
+
+/* Final compact workflow override. */
+.workflow-step>a {
+  min-height: 72px;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.workflow-step>a>span {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+
+.workflow-step>svg {
+  top: 20px;
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width:700px) {
+  .workflow-step>a {
+    min-height: 66px;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .workflow-step>a>span {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+
+  .workflow-step>svg {
+    top: 18px;
+    width: 20px;
+    height: 20px;
+  }
 }
