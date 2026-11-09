@@ -84,6 +84,34 @@ function Shell() {
 function ActionDialog({title,onClose,children}:{title:string;onClose:()=>void;children?:ReactNode}) {
   return <Modal title={title} onClose={onClose}>{children}<div className="modal-actions"><button className="button secondary" onClick={onClose}>Cancel</button></div></Modal>;
 }
+function FlagDialog({sound,busy,error,onClose,onSubmit}:{sound:SoundView;busy:boolean;error:string;onClose:()=>void;onSubmit:(reason:string)=>Promise<void>}) {
+  const [reason,setReason]=useState('');
+  const [validationError,setValidationError]=useState('');
+  const submit=async()=>{
+    if(!reason){setValidationError('Choose a reason before flagging this sample.');return;}
+    setValidationError('');
+    await onSubmit(reason);
+  };
+  return <Modal title="Flag sample" onClose={onClose}>
+    <div className="flag-dialog">
+      <div className="flag-dialog-intro">
+        <span className="flag-dialog-icon" aria-hidden="true"><Flag size={19}/></span>
+        <div><p>Report <strong>“{sound.name}”</strong> for review.</p><p className="flag-dialog-note">A moderation request will be added to the sound flags table.</p></div>
+      </div>
+      <label className="form-label" htmlFor="flag-reason">Reason
+        <select id="flag-reason" value={reason} aria-invalid={Boolean(validationError)} aria-describedby={validationError?'flag-reason-error':undefined} onChange={event=>{setReason(event.target.value);setValidationError('');}}>
+          <option value="">Choose a reason</option>
+          <option value="Inappropriate content">Inappropriate content</option>
+          <option value="Copyright concern">Copyright concern</option>
+          <option value="Spam or misleading">Spam or misleading</option>
+        </select>
+      </label>
+      {validationError&&<p id="flag-reason-error" className="field-error" role="alert">{validationError}</p>}
+      {error&&<p className="service-message error" role="alert">{error}</p>}
+      <div className="modal-actions flag-dialog-actions"><button className="button secondary" disabled={busy} onClick={onClose}>Cancel</button><button className="button primary" disabled={busy} onClick={submit}>{busy?'Flagging…':'Flag sample'}</button></div>
+    </div>
+  </Modal>;
+}
 function SignInPrompt({message,onClose}:{message:string;onClose:()=>void}) {
   return <Modal title="Sign in to continue" onClose={onClose}><p className="muted">{message}</p><div className="modal-actions"><button className="button secondary" onClick={onClose}>Not now</button><Link className="button primary" to="/login">Go to sign in</Link></div></Modal>;
 }
@@ -261,11 +289,17 @@ function LibraryPage() {
       <Link to="/parameters" className="button primary full continue-action">Continue to parameters<ArrowRight size={21}/></Link>
     </aside></div>
     {dialog?.type==='Record sound'&&<RecordDialog onClose={()=>setDialog(null)} onSaved={sound=>setLibrarySounds(current=>[sound,...current])}/>}
-    {dialog&&dialog.type!=='Record sound'&&<ActionDialog title={dialog.type} onClose={()=>setDialog(null)}>
+    {dialog?.type==='Delete sound'&&<ActionDialog title={dialog.type} onClose={()=>setDialog(null)}>
       {dialog.type==='Delete sound'&&<><p className="muted">Delete “{dialog.sound?.name}”?</p><button className="button secondary" disabled={busy==='delete'} onClick={async()=>{if(dialog.sound&&await run('delete',()=>soundService.delete(dialog.sound!.id))){setLibrarySounds(current=>current.filter(sound=>sound.id!==dialog.sound!.id));setDialog(null);}}}>Delete sound</button></>}
-      {dialog.type==='Flag sample'&&<><p className="muted">Flag “{dialog.sound?.name}” for moderation. This creates a row in the sound flags table.</p><label className="form-label">Reason<select id="flag-reason" defaultValue=""><option value="">Choose a reason</option><option>Inappropriate content</option><option>Copyright concern</option><option>Spam or misleading</option></select></label><button className="button primary" disabled={busy==='flag'} onClick={async()=>{const reason=(document.getElementById('flag-reason') as HTMLSelectElement).value;if(!reason){setServiceError('Choose a reason before flagging this sample.');return;}if(dialog.sound&&await run('flag',()=>soundService.flag(dialog.sound!.id,reason))){setFlaggedIds(current=>[...current,dialog.sound!.id]);setDialog(null);}}}>Flag sample</button></>}
       {serviceError&&<p className="service-message error" role="alert">{serviceError}</p>}
     </ActionDialog>}
+    {dialog?.type==='Flag sample'&&dialog.sound&&<FlagDialog
+      sound={dialog.sound}
+      busy={busy==='flag'}
+      error={serviceError}
+      onClose={()=>setDialog(null)}
+      onSubmit={async reason=>{if(await run('flag',()=>soundService.flag(dialog.sound!.id,reason))){setFlaggedIds(current=>[...current,dialog.sound!.id]);setDialog(null);}}}
+    />}
     {signInPrompt&&<SignInPrompt message={signInPrompt} onClose={()=>setSignInPrompt('')}/>}
   </main>;
 }
