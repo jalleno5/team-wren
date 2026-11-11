@@ -1,0 +1,30 @@
+{
+  "programs": {
+    "0": {
+      "file": "glass_clink.wav",
+      "root_note": 84,
+      "loop": false
+    },
+    "33": {
+      "file": "glass_clink.wav",
+      "root_note": 84,
+      "loop": false
+    },
+    "48": {
+      "file": "glass_clink.wav",
+      "root_note": 84,
+      "loop": false
+    }
+  },
+  "drums": {
+    "37": {
+      "file": "finger_snap.wav"
+    },
+    "39": {
+      "file": "hand_clap.wav"
+    },
+    "43": {
+      "file": "door_knock.wav"
+    }
+  }
+}

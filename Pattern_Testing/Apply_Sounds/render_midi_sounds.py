@@ -28,6 +28,11 @@ def resolve_path(value, base):
 
 def read_mapping(path, sounds_dir):
     raw = json.loads(path.read_text(encoding="utf-8"))
+    return parse_mapping(raw, sounds_dir)
+
+
+def parse_mapping(raw, sounds_dir):
+    """Accept the same JSON-compatible dictionary used by the CLI."""
     instruments = {}
     drums = {}
     for key, entry in raw.get("programs", {}).items():
@@ -41,6 +46,8 @@ def read_mapping(path, sounds_dir):
             "root_note": int(entry.get("root_note", 60)),
             "loop": bool(entry.get("loop", True)),
         }
+        if not 0 <= instruments[program]["root_note"] <= 127:
+            raise ValueError("root_note must be between 0 and 127")
     for key, entry in raw.get("drums", {}).items():
         note = int(key)
         if not 0 <= note <= 127:
@@ -54,6 +61,22 @@ def read_mapping(path, sounds_dir):
         if not item["file"].is_file():
             raise FileNotFoundError(f"Audio sample not found: {item['file']}")
     return instruments, drums
+
+
+def apply_sounds(midi_path, mapping, output_path, *, sounds_dir=None):
+    """Render a MIDI with a mapping dictionary or JSON path; return render metadata.
+
+    Relative sample paths resolve against sounds_dir, or the JSON file's folder.
+    """
+    if isinstance(mapping, (str, Path)):
+        mapping_path = Path(mapping).resolve()
+        raw = json.loads(mapping_path.read_text(encoding="utf-8"))
+        base = Path(sounds_dir) if sounds_dir is not None else mapping_path.parent
+    else:
+        raw = mapping
+        base = Path(sounds_dir) if sounds_dir is not None else Path.cwd()
+    programs, drums = parse_mapping(raw, base)
+    return render_file(Path(midi_path), Path(output_path), programs, drums, {})
 
 
 def load_sample(path, cache):
@@ -166,8 +189,7 @@ def render_file(midi_path, output_path, programs, drums, cache):
                           duration, config.get("loop", False), is_drum)
         scheduled.append((round(start * SAMPLE_RATE), clip))
     if not scheduled:
-        print(f"SKIPPED {midi_path.name}: no notes match the mapping")
-        return
+        raise ValueError(f"No notes in {midi_path.name} match the mapping")
     n_frames = max(begin + len(clip) for begin, clip in scheduled) + round(0.25 * SAMPLE_RATE)
     output = np.zeros((n_frames, 2), dtype=np.float32)
     for begin, clip in scheduled:
@@ -182,6 +204,8 @@ def render_file(midi_path, output_path, programs, drums, cache):
         print(f"  Unmapped programs (0-based): {sorted(missing_programs)}")
     if missing_drums:
         print(f"  Unmapped drum notes: {sorted(missing_drums)}")
+    return {"path": str(output_path), "rendered_notes": len(scheduled),
+            "unmapped_programs": sorted(missing_programs), "unmapped_drums": sorted(missing_drums)}
 
 
 def main():
@@ -190,7 +214,7 @@ def main():
     parser.add_argument("midi_file", help="Path to exactly one .mid or .midi file (required)")
     parser.add_argument("--mapping", default="sound_map.json")
     parser.add_argument("--sounds", default="../Sounds")
-    parser.add_argument("--output-dir", default="../Songs/Fermata_Songs")
+    parser.add_argument("--output-dir", default="../outputs/rendered")
     parser.add_argument("--output", help="Optional output WAV filename/path; defaults to <MIDI stem>.wav in --output-dir")
     args = parser.parse_args()
 

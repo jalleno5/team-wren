@@ -1,0 +1,80 @@
+{
+  "kind": "synthetic foley; not field recordings",
+  "sample_rate": 44100,
+  "channels": 1,
+  "format": "WAV PCM_16",
+  "generator": "generate_everyday.py",
+  "source": "Procedurally synthesized locally; no third-party audio samples",
+  "samples": [
+    {
+      "file": "door_knock.wav",
+      "description": "Three hollow wooden door knocks",
+      "duration_seconds": 0.7,
+      "root_note": null,
+      "loop": false
+    },
+    {
+      "file": "finger_snap.wav",
+      "description": "A short bright finger snap",
+      "duration_seconds": 0.18,
+      "root_note": null,
+      "loop": false
+    },
+    {
+      "file": "hand_clap.wav",
+      "description": "A single hand clap with a short diffuse tail",
+      "duration_seconds": 0.38,
+      "root_note": null,
+      "loop": false
+    },
+    {
+      "file": "key_jingle.wav",
+      "description": "A brief shake of metallic keys",
+      "duration_seconds": 1.15,
+      "root_note": null,
+      "loop": false
+    },
+    {
+      "file": "coin_drop.wav",
+      "description": "A metallic coin bouncing to rest",
+      "duration_seconds": 0.95,
+      "root_note": null,
+      "loop": false
+    },
+    {
+      "file": "glass_clink.wav",
+      "description": "A ringing glass clink, strongest resonance C6",
+      "duration_seconds": 1.2,
+      "root_note": 84,
+      "loop": false
+    },
+    {
+      "file": "water_drop.wav",
+      "description": "A plinking water droplet",
+      "duration_seconds": 0.42,
+      "root_note": null,
+      "loop": false
+    },
+    {
+      "file": "paper_crumple.wav",
+      "description": "Several dry paper crinkles",
+      "duration_seconds": 1.1,
+      "root_note": null,
+      "loop": false
+    },
+    {
+      "file": "zipper_pull.wav",
+      "description": "A short rasping zipper pull",
+      "duration_seconds": 0.85,
+      "root_note": null,
+      "loop": false
+    },
+    {
+      "file": "switch_click.wav",
+      "description": "A mechanical switch click",
+      "duration_seconds": 0.23,
+      "root_note": null,
+      "loop": false
+    }
+  ]
+}
