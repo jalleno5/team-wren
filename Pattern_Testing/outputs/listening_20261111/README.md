@@ -53,3 +53,7 @@ PyTorch 2.8.0 + CUDA 12.8 ran on the RTX 4060 Laptop GPU in the shared .venv.
 run_demos.py reproduces the four prompts and both mappings. Existing originals
 and MIDI files are reused; choose a fresh output location for fresh generations.
 The optional additional second-take batch was not run.
+
+
+latin_bossa and minimal_house were tests to see if strict adherence to bpm could be trusted.
+Results show that while guided the model does not perfectly match exact bpm. 

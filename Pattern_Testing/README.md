@@ -32,7 +32,7 @@ $env:MT3_CHECKPOINT_DIR = "outputs/.model_cache/mt3"
 Generate audio and transcribe it:
 
 ```powershell
-python pipeline.py "A simple trap beat with kick, snare, hi-hats and bass" --duration 10 --output-dir outputs/local
+python pipeline.py "{description here}" --duration 10 --output-dir outputs/local
 ```
 
 This saves `generated.wav`, `transcribed.mid` and `result.json`.
@@ -59,8 +59,13 @@ From `pattern_testing`, in the same environment:
 ```powershell
 $env:MUSIC_API_KEY = "replace-with-a-long-random-secret"
 python -m uvicorn api:app --host 127.0.0.1 --port 8000 --workers 1
+# This could be subject to change depending on integration
 ```
 
+
+
+
+### IMPORTANT FOR INTEGRATION WITH APP 
 Every request requires `Authorization: Bearer <MUSIC_API_KEY>`.
 Set environment variables in your shell/host; `.env.example` is not auto-loaded.
 
