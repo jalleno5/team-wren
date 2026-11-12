@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from pipeline import ROOT, apply_sounds, run_pipeline
 from Apply_Sounds.yamnet_mapping import build_sound_mapping, load_class_table
+from percussion_pipeline import run_percussion_pipeline
 
 OUTPUTS = Path(os.getenv("MUSIC_OUTPUT_DIR", str(ROOT / "outputs"))).resolve()
 SOUNDS = Path(os.getenv("MUSIC_SOUNDS_DIR", str(ROOT / "Sounds"))).resolve()
@@ -110,6 +111,42 @@ class MappingRequest(BaseModel):
     fallback: str = "nearest"
 
 
+class PercussionRequest(BaseModel):
+    prompt: str | None = Field(default=None, min_length=1, max_length=2000)
+    source_job_id: str | None = None
+    duration: float = Field(default=10, ge=1, le=30)
+    mapping: dict | None = None
+    sounds: list[dict] | None = Field(default=None, min_length=1, max_length=1000)
+    drums_gain_db: float = Field(default=0, ge=-24, le=12, allow_inf_nan=False)
+    accompaniment_gain_db: float = Field(default=0, ge=-24, le=12, allow_inf_nan=False)
+
+
+def validate_percussion_request(request):
+    if (request.prompt is None) == (request.source_job_id is None):
+        raise HTTPException(422, "Supply exactly one of prompt or source_job_id")
+    if request.prompt is not None and not request.prompt.strip():
+        raise HTTPException(422, "Prompt must not be blank")
+    if (request.mapping is None) == (request.sounds is None):
+        raise HTTPException(422, "Supply exactly one of mapping or classified sounds")
+    if request.source_job_id is not None:
+        source = read_job(request.source_job_id)
+        if source["status"] not in {"completed", "failed"} or not (job_dir(request.source_job_id) / "generated.wav").is_file():
+            raise HTTPException(409, "Source audio is not available yet")
+    if request.mapping is not None:
+        if request.mapping.get("programs") or not request.mapping.get("drums"):
+            raise HTTPException(422, "Use a drums mapping without programs")
+        validate_mapping(request.mapping)
+    else:
+        try:
+            build_sound_mapping(request.sounds)  # Validate trusted class IDs and controls before queuing.
+            for sound in request.sounds:
+                sample = (SOUNDS / sound["file"]).resolve()
+                if not sample.is_relative_to(SOUNDS) or not sample.is_file():
+                    raise ValueError("Every classified sample must be a file inside the sound library")
+        except (ValueError, KeyError, TypeError) as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+
 @app.get("/music/yamnet/classes")
 def get_yamnet_classes():
     return load_class_table()
@@ -134,7 +171,16 @@ def create_mapping(request: MappingRequest):
 
 def execute(folder, request):
     try:
-        if isinstance(request, GenerationRequest):
+        if isinstance(request, PercussionRequest):
+            source_audio = job_dir(request.source_job_id) / "generated.wav" if request.source_job_id else None
+            result = run_percussion_pipeline(
+                request.prompt, folder, source_audio=source_audio, duration=request.duration,
+                mapping=request.mapping, sounds=request.sounds, sounds_dir=SOUNDS,
+                model=os.getenv("MUSICGEN_MODEL", "facebook/musicgen-small"),
+                drums_gain_db=request.drums_gain_db, accompaniment_gain_db=request.accompaniment_gain_db,
+                progress=lambda stage: update_job(folder, status=stage),
+            )
+        elif isinstance(request, GenerationRequest):
             result = run_pipeline(
                 request.prompt, folder, duration=request.duration, mapping=request.mapping,
                 sounds_dir=SOUNDS, model=os.getenv("MUSICGEN_MODEL", "facebook/musicgen-small"),
@@ -156,7 +202,10 @@ def execute(folder, request):
 
 
 def submit(request):
-    validate_mapping(request.mapping)
+    if isinstance(request, PercussionRequest):
+        validate_percussion_request(request)
+    else:
+        validate_mapping(request.mapping)
     if not SLOTS.acquire(blocking=False):
         raise HTTPException(429, "Worker queue is full; retry later")
     try:
@@ -174,6 +223,11 @@ def submit(request):
 def create_job(request: GenerationRequest):
     if not request.prompt.strip():
         raise HTTPException(422, "Prompt must not be blank")
+    return submit(request)
+
+
+@app.post("/music/percussion-jobs", status_code=202)
+def create_percussion_job(request: PercussionRequest):
     return submit(request)
 
 
@@ -195,7 +249,9 @@ def get_job(job_id: str):
     return data
 
 
-ARTIFACTS = {"audio": "generated.wav", "midi": "transcribed.mid", "rendered": "rendered.wav"}
+ARTIFACTS = {"audio": "generated.wav", "midi": "transcribed.mid", "rendered": "rendered.wav",
+             "drums": "drums.wav", "accompaniment": "accompaniment.wav",
+             "percussion": "percussion.wav", "raw_midi": "raw_transcribed.mid"}
 
 
 @app.get("/music/jobs/{job_id}/artifacts/{kind}")
@@ -206,4 +262,4 @@ def download(job_id: str, kind: str):
     path = job_dir(job_id) / ARTIFACTS[kind]
     if data["status"] not in {"completed", "failed"} or not path.is_file():
         raise HTTPException(404, "Artifact not available")
-    return FileResponse(path, media_type="audio/midi" if kind == "midi" else "audio/wav", filename=path.name)
+    return FileResponse(path, media_type="audio/midi" if path.suffix == ".mid" else "audio/wav", filename=path.name)

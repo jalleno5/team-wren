@@ -276,6 +276,56 @@
       "note": "Failed first house attempt; empty MIDI kept for provenance"
     },
     {
+      "path": "percussion_demo/accompaniment.wav",
+      "bytes": 4212520,
+      "sha256": "7db22b5a1d6ed2d5ca117f3e6c19e3d6a099f56869bc9821e2f8262265446f5e",
+      "duration_seconds": 11.94,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "percussion_demo/drums.wav",
+      "bytes": 4212520,
+      "sha256": "d97128cb02cc97936d1422555ae1f82ebf8832a82c054e0d999f961f90d7add9",
+      "duration_seconds": 11.94,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "percussion_demo/generated.wav",
+      "bytes": 764204,
+      "sha256": "9ed4ff560642208ffc74b0aba777494e24dfa4b30bfa69d0cd905560db288033",
+      "duration_seconds": 11.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "percussion_demo/percussion.wav",
+      "bytes": 2150288,
+      "sha256": "166c21e49c85a0ea209f59a55aa969d8cf20d6d043b75624a55d32bac72badd7",
+      "duration_seconds": 12.19,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "percussion_demo/raw_transcribed.mid",
+      "bytes": 534,
+      "sha256": "3e7a391ce7fafd0fd21e03570263dabfd21b4df36cd79c0505fbd1823013190a"
+    },
+    {
+      "path": "percussion_demo/rendered.wav",
+      "bytes": 2106260,
+      "sha256": "dcb0de3870e230bfc15ddee32a52f0e7dc77c1dcc20fd4de138fc45e9b07faef",
+      "duration_seconds": 11.94,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "percussion_demo/transcribed.mid",
+      "bytes": 534,
+      "sha256": "3e7a391ce7fafd0fd21e03570263dabfd21b4df36cd79c0505fbd1823013190a"
+    },
+    {
       "path": "rendered/everyday_jazz.wav",
       "bytes": 6283132,
       "sha256": "5a556ecce9454ee4f8a1b790c8097d18e42c47fbf113b2cf1426deb603689fc2",

@@ -2,6 +2,8 @@
 
 Latest: [simple trap retry and selected everyday-sound preview](simple_trap_retry/README.md).
 
+Optional path: [HDemucs percussion replacement with preserved accompaniment](percussion_demo/README.md).
+
 This folder contains generated audio, transcribed MIDI, sample mappings and
 experiment metadata for colleague review. The application pipeline remains
 **MusicGen Small -> YourMT3+ -> sample rendering**.

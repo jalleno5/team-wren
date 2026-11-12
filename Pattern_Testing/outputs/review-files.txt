@@ -72,6 +72,17 @@ listening_focused_20261111/minimal_house_110/transcribed_attempt1.mid
 listening_focused_20261111/run_demos.py
 listening_focused_20261111/session.json
 listening_focused_20261111/tempo_analysis.json
+percussion_demo/README.md
+percussion_demo/accompaniment.wav
+percussion_demo/demo_mapping.json
+percussion_demo/drums.wav
+percussion_demo/generated.wav
+percussion_demo/mapping.json
+percussion_demo/percussion.wav
+percussion_demo/raw_transcribed.mid
+percussion_demo/rendered.wav
+percussion_demo/result.json
+percussion_demo/transcribed.mid
 rendered/README.md
 rendered/everyday_jazz.wav
 rendered/everyday_jazz_classified.wav

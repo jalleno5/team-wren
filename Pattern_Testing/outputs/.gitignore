@@ -13,6 +13,8 @@
 !listening_focused_20261111/**
 !simple_trap_retry/
 !simple_trap_retry/**
+!percussion_demo/
+!percussion_demo/**
 
 # Keep machine-specific data local, including inside review folders.
 .model_cache/

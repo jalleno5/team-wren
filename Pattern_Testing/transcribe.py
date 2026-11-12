@@ -5,13 +5,22 @@ from pathlib import Path
 
 def transcribe(audio: Path, output: Path):
     from mt3_infer import transcribe as infer
+    import numpy as np
     import soundfile as sf
 
     output.parent.mkdir(parents=True, exist_ok=True)
     waveform, sample_rate = sf.read(audio, dtype="float32", always_2d=True)
     if len(waveform) == 0:
         raise ValueError("Cannot transcribe empty audio")
-    midi = infer(waveform.mean(axis=1), sr=sample_rate, model="yourmt3")
+    if not np.isfinite(waveform).all():
+        raise ValueError("Cannot transcribe nonfinite audio")
+    mono = waveform.mean(axis=1)
+    # Float separation stems can exceed full scale. Scale only the inference
+    # copy; preserve the stem on disk for correct levels when remixing.
+    peak = float(np.abs(mono).max())
+    if peak > 1:
+        mono = mono / peak
+    midi = infer(mono, sr=sample_rate, model="yourmt3")
     midi.save(str(output))
     return output
 

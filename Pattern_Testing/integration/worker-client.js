@@ -24,6 +24,14 @@ export async function getMusicJob(id) {
   return (await workerRequest(`/music/jobs/${encodeURIComponent(id)}`)).json();
 }
 
+// Optional drum replacement + preserved accompaniment. Check source job ownership.
+// Provide either {prompt, duration} or {source_job_id}, plus {mapping} or {sounds}.
+export async function createPercussionJob(options) {
+  return (await workerRequest('/music/percussion-jobs', {
+    method: 'POST', body: options,
+  })).json();
+}
+
 // Check ownership of sourceJobId in your authenticated route before calling.
 export async function createSoundMapping(sounds, sourceJobId, fallback = 'nearest') {
   return (await workerRequest('/music/mappings', {
