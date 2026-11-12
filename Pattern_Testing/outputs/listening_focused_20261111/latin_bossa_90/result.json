@@ -1,0 +1,45 @@
+{
+  "bpm": 90,
+  "seed": 242,
+  "prompt": "Sparse relaxed Latin bossa nova instrumental at exactly 90 BPM in steady 4/4 time. Prominent playful marimba melody with occasional glockenspiel notes, warm fingered electric bass playing a simple syncopated bass line, dry woodblock rhythm, soft hand claps and finger snaps, gentle bass drum. Exclusive instrumentation: marimba, glockenspiel, electric bass, woodblock, hand claps, finger snaps, bass drum. Short distinct notes, spacious arrangement, clean dry studio recording.",
+  "duration_requested": 16,
+  "model": "facebook/musicgen-small",
+  "midi": {
+    "notes": 58,
+    "programs": [
+      8,
+      65
+    ],
+    "drums": []
+  },
+  "everyday": {
+    "path": "listening_focused_20261111/latin_bossa_90/everyday.wav",
+    "rendered_notes": 58,
+    "sample_preparation": {
+      "target_active_rms_dbfs": -20.0,
+      "max_boost_db": 18.0,
+      "peak_ceiling": 0.9
+    },
+    "unmapped_programs": [],
+    "unmapped_drums": [],
+    "sample_note_counts": {
+      "glass_clink.wav": 58
+    }
+  },
+  "mixed": {
+    "path": "listening_focused_20261111/latin_bossa_90/mixed.wav",
+    "rendered_notes": 58,
+    "sample_preparation": {
+      "target_active_rms_dbfs": -20.0,
+      "max_boost_db": 18.0,
+      "peak_ceiling": 0.9
+    },
+    "unmapped_programs": [],
+    "unmapped_drums": [],
+    "sample_note_counts": {
+      "glass_clink.wav": 58
+    }
+  },
+  "status": "completed",
+  "elapsed_seconds": 0.14
+}

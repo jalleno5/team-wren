@@ -1,0 +1,119 @@
+{
+  "mapping": {
+    "programs": {},
+    "drums": {
+      "36": {
+        "file": "door_knock.wav"
+      },
+      "38": {
+        "file": "hand_clap.wav"
+      },
+      "42": {
+        "file": "paper_crumple.wav"
+      },
+      "45": {
+        "file": "door_knock.wav"
+      },
+      "47": {
+        "file": "door_knock.wav"
+      },
+      "48": {
+        "file": "door_knock.wav"
+      }
+    }
+  },
+  "assignments": [
+    {
+      "kind": "drum",
+      "number": 36,
+      "file": "door_knock.wav",
+      "input_index": 0,
+      "class": "Knock",
+      "preferred_instrument": "Hi Wood Block",
+      "user_corrected": false,
+      "reason": "same_kind_fallback"
+    },
+    {
+      "kind": "drum",
+      "number": 38,
+      "file": "hand_clap.wav",
+      "input_index": 2,
+      "class": "Clapping",
+      "preferred_instrument": "Hand Clap",
+      "user_corrected": false,
+      "reason": "similar_role"
+    },
+    {
+      "kind": "drum",
+      "number": 42,
+      "file": "paper_crumple.wav",
+      "input_index": 7,
+      "class": "Crumpling, crinkling",
+      "preferred_instrument": "Closed Hi-Hat",
+      "user_corrected": false,
+      "reason": "exact_instrument"
+    },
+    {
+      "kind": "drum",
+      "number": 45,
+      "file": "door_knock.wav",
+      "input_index": 0,
+      "class": "Knock",
+      "preferred_instrument": "Hi Wood Block",
+      "user_corrected": false,
+      "reason": "same_kind_fallback"
+    },
+    {
+      "kind": "drum",
+      "number": 47,
+      "file": "door_knock.wav",
+      "input_index": 0,
+      "class": "Knock",
+      "preferred_instrument": "Hi Wood Block",
+      "user_corrected": false,
+      "reason": "same_kind_fallback"
+    },
+    {
+      "kind": "drum",
+      "number": 48,
+      "file": "door_knock.wav",
+      "input_index": 0,
+      "class": "Knock",
+      "preferred_instrument": "Hi Wood Block",
+      "user_corrected": false,
+      "reason": "same_kind_fallback"
+    }
+  ],
+  "skipped_sounds": [],
+  "unused_sounds": [
+    {
+      "input_index": 1,
+      "file": "finger_snap.wav"
+    },
+    {
+      "input_index": 3,
+      "file": "key_jingle.wav"
+    },
+    {
+      "input_index": 4,
+      "file": "coin_drop.wav"
+    },
+    {
+      "input_index": 5,
+      "file": "glass_clink.wav"
+    },
+    {
+      "input_index": 6,
+      "file": "water_drop.wav"
+    },
+    {
+      "input_index": 8,
+      "file": "zipper_pull.wav"
+    },
+    {
+      "input_index": 9,
+      "file": "switch_click.wav"
+    }
+  ],
+  "unmapped": []
+}

@@ -1,0 +1,20 @@
+{
+  "programs": {
+    "38": {
+      "file": "glass_clink.wav",
+      "root_note": 84,
+      "loop": false
+    },
+    "9": {
+      "file": "water_drop.wav",
+      "root_note": 86,
+      "loop": false
+    }
+  },
+  "drums": {
+    "36": "door_knock.wav",
+    "38": "hand_clap.wav",
+    "42": "finger_snap.wav",
+    "37": "switch_click.wav"
+  }
+}

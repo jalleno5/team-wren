@@ -1,0 +1,28 @@
+{
+  "genre": "choir",
+  "prompt": "A slow uplifting gospel church hymn, warm choir singing sustained wordless ah harmonies, gentle church organ chords, soft piano, restrained percussion, reverent and peaceful, 75 BPM",
+  "requested_seconds": 12,
+  "model": "facebook/musicgen-small",
+  "seed": 107,
+  "midi": {
+    "notes": 34,
+    "programs": [
+      48
+    ],
+    "drums": []
+  },
+  "everyday": {
+    "path": "listening_20261111/choir/everyday.wav",
+    "rendered_notes": 34,
+    "unmapped_programs": [],
+    "unmapped_drums": []
+  },
+  "mixed": {
+    "path": "listening_20261111/choir/mixed.wav",
+    "rendered_notes": 34,
+    "unmapped_programs": [],
+    "unmapped_drums": []
+  },
+  "status": "completed",
+  "elapsed_seconds": 10.0
+}

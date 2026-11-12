@@ -1,0 +1,17 @@
+{
+  "path": "listening_20261111/chatgpt_midi/handwritten_trap.wav",
+  "rendered_notes": 85,
+  "sample_preparation": {
+    "target_active_rms_dbfs": -20.0,
+    "max_boost_db": 18.0,
+    "peak_ceiling": 0.9
+  },
+  "unmapped_programs": [],
+  "unmapped_drums": [],
+  "bpm": 96,
+  "duration_seconds": 10,
+  "note_count": 85,
+  "bass_reference_hz": 43.10344827586207,
+  "bass_reference_midi": 29,
+  "source": "Handwritten notes; no generation/transcription/classification models"
+}

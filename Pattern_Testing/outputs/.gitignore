@@ -1,0 +1,24 @@
+# Publish only the curated review folders and index files.
+*
+!.gitignore
+!README.md
+!artifact_paths.py
+!review-files.txt
+!review_manifest.json
+!rendered/
+!rendered/**
+!listening_20261111/
+!listening_20261111/**
+!listening_focused_20261111/
+!listening_focused_20261111/**
+!simple_trap_retry/
+!simple_trap_retry/**
+
+# Keep machine-specific data local, including inside review folders.
+.model_cache/
+test-tmp/
+__pycache__/
+*.pyc
+*.log
+.cleanup_integrity_before.json
+.media_integrity_before.json

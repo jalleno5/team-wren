@@ -42,13 +42,14 @@ def main():
 
     has_cuda = torch.cuda.is_available()
     dtype = torch.float16 if has_cuda else torch.float32
-    print(f"Device: {'CUDA (automatic GPU/CPU placement)' if has_cuda else 'CPU'}")
+    print(f"Device: {'CUDA' if has_cuda else 'CPU'}")
     print(f"Loading {args.model} (first run downloads model weights)...")
     processor = AutoProcessor.from_pretrained(args.model)
-    # accelerate dispatches layers to GPU/CPU if the model exceeds available VRAM.
+    # MusicGen in Transformers 4.43 does not support device_map="auto".
+    # Place the complete model explicitly; Small fits on the demo's 8 GB GPU.
     model = MusicgenForConditionalGeneration.from_pretrained(
-        args.model, torch_dtype=dtype, device_map="auto" if has_cuda else "cpu"
-    )
+        args.model, torch_dtype=dtype
+    ).to("cuda" if has_cuda else "cpu")
     model.eval()
 
     inputs = processor(text=[args.prompt], padding=True, return_tensors="pt")

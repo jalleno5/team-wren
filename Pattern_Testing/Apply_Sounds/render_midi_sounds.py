@@ -17,8 +17,61 @@ from pathlib import Path
 import mido
 import numpy as np
 import soundfile as sf
+from scipy.ndimage import uniform_filter1d
+from scipy.signal import butter, sosfilt
 
 SAMPLE_RATE = 44100
+TARGET_RMS_DBFS = -20.0
+MAX_BOOST_DB = 18.0
+SAMPLE_PEAK_CEILING = 0.9
+
+
+def active_rms(data):
+    """Measure active 20 ms frames so silence does not drive amplification."""
+    frame = max(1, round(.020 * SAMPLE_RATE))
+    energy = np.mean(np.square(data, dtype=np.float64), axis=1)
+    sums = np.add.reduceat(energy, np.arange(0, len(energy), frame))
+    lengths = np.minimum(frame, len(energy) - np.arange(0, len(energy), frame))
+    levels = np.sqrt(sums / lengths)
+    active = levels >= max(float(levels.max()) * .01, 1e-5)
+    if not active.any():
+        return 0.0
+    return float(np.sqrt(sums[active].sum() / lengths[active].sum()))
+
+
+def prepare_sample(data):
+    """Balance and soften a decoded sample before pitch/duration and MIDI velocity.
+
+    Preserve timing, stereo balance and the source file. Active-frame RMS is a
+    practical short-sample level estimate, not an integrated LUFS measurement.
+    """
+    data = np.asarray(data, dtype=np.float32).copy()
+    if data.ndim != 2 or not len(data) or not np.isfinite(data).all():
+        raise ValueError("Sample must contain finite, nonempty audio frames")
+    # Remove DC/subsonic rumble without changing sample length or alignment.
+    data = sosfilt(butter(2, 30, btype="highpass", fs=SAMPLE_RATE, output="sos"), data, axis=0)
+    level = active_rms(data)
+    if level < 1e-5:
+        return np.zeros_like(data, dtype=np.float32)
+    # A linked stereo RMS envelope gently compresses peaks (3:1) above the
+    # sample's active level. Smooth the gain to avoid abrupt level changes.
+    envelope = np.sqrt(np.maximum(uniform_filter1d(np.mean(data * data, axis=1),
+                       size=max(1, round(.005 * SAMPLE_RATE)), mode="nearest"), 0))
+    threshold = level * 1.5
+    ratio = np.maximum(envelope / threshold, 1.0)
+    gain = uniform_filter1d(ratio ** (-2 / 3), size=max(1, round(.010 * SAMPLE_RATE)), mode="nearest")
+    data *= gain[:, None]
+    attack = min(round(.002 * SAMPLE_RATE), len(data) // 2)
+    release = min(round(.008 * SAMPLE_RATE), len(data) // 2)
+    if attack:
+        data[:attack] *= np.linspace(0, 1, attack)[:, None]
+    if release:
+        data[-release:] *= np.linspace(1, 0, release)[:, None]
+    level = active_rms(data)
+    if level > 0:
+        boost = min(10 ** (TARGET_RMS_DBFS / 20) / level, 10 ** (MAX_BOOST_DB / 20))
+        data *= min(boost, SAMPLE_PEAK_CEILING / max(float(np.abs(data).max()), 1e-12))
+    return data.astype(np.float32)
 
 
 def resolve_path(value, base):
@@ -108,7 +161,8 @@ def load_sample(path, cache):
             positions = np.arange(max(1, round(len(data) * SAMPLE_RATE / rate))) * rate / SAMPLE_RATE
             positions = np.minimum(positions, len(data) - 1)
             data = interpolate_stereo(data, positions)
-        cache[path] = data
+        # Prepare once per source sample. synth_note applies velocity afterward.
+        cache[path] = prepare_sample(data)
     return cache[path]
 
 
@@ -205,6 +259,8 @@ def render_file(midi_path, output_path, programs, drums, cache):
     if missing_drums:
         print(f"  Unmapped drum notes: {sorted(missing_drums)}")
     return {"path": str(output_path), "rendered_notes": len(scheduled),
+            "sample_preparation": {"target_active_rms_dbfs": TARGET_RMS_DBFS,
+                                   "max_boost_db": MAX_BOOST_DB, "peak_ceiling": SAMPLE_PEAK_CEILING},
             "unmapped_programs": sorted(missing_programs), "unmapped_drums": sorted(missing_drums)}
 
 

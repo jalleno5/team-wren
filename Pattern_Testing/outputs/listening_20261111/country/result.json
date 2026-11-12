@@ -1,0 +1,40 @@
+{
+  "genre": "country",
+  "prompt": "An upbeat country instrumental groove, fingerpicked acoustic guitar, twangy banjo melody, warm electric bass, steady brushed drums, 100 BPM, clean studio recording",
+  "requested_seconds": 12,
+  "model": "facebook/musicgen-small",
+  "seed": 105,
+  "midi": {
+    "notes": 355,
+    "programs": [
+      0,
+      8,
+      24,
+      33,
+      48,
+      65
+    ],
+    "drums": [
+      36,
+      38,
+      42,
+      45,
+      47,
+      69
+    ]
+  },
+  "everyday": {
+    "path": "listening_20261111/country/everyday.wav",
+    "rendered_notes": 355,
+    "unmapped_programs": [],
+    "unmapped_drums": []
+  },
+  "mixed": {
+    "path": "listening_20261111/country/mixed.wav",
+    "rendered_notes": 355,
+    "unmapped_programs": [],
+    "unmapped_drums": []
+  },
+  "status": "completed",
+  "elapsed_seconds": 13.31
+}

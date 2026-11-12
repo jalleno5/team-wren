@@ -4,9 +4,13 @@ numpy>=1.26,<3
 soundfile>=0.13.1,<1
 fastapi>=0.109,<1
 uvicorn>=0.27,<1
-torch>=2.4,<3
-transformers>=4.41,<5
+# Matching PyTorch packages; choose the CUDA wheel index for GPU deployment.
+torch==2.8.0
+torchvision==0.23.0
+torchaudio==2.8.0
+# YourMT3's legacy T5 decoder fails with the cache contract in 4.57.6.
+transformers==4.43.4
 accelerate>=0.30,<2
 scipy>=1.12,<2
 sentencepiece>=0.2,<1
-mt3-infer[torch] @ git+https://github.com/openmirlab/mt3-infer.git
+mt3-infer[torch] @ git+https://github.com/openmirlab/mt3-infer.git@d8cbd287470291dee335f84315c5a9b9ff6e6c8a

@@ -1,0 +1,134 @@
+{
+  "trap": {
+    "genre": "trap",
+    "prompt": "A dark instrumental trap beat, deep 808 bass, crisp snare backbeats, fast rolling hi hats, sparse minor key piano melody, 140 BPM, clean studio recording",
+    "requested_seconds": 12,
+    "model": "facebook/musicgen-small",
+    "seed": 104,
+    "midi": {
+      "notes": 16,
+      "programs": [],
+      "drums": [
+        36,
+        38,
+        42,
+        45,
+        47,
+        48
+      ]
+    },
+    "everyday": {
+      "path": "listening_20261111/trap/everyday.wav",
+      "rendered_notes": 16,
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "mixed": {
+      "path": "listening_20261111/trap/mixed.wav",
+      "rendered_notes": 16,
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "status": "completed",
+    "elapsed_seconds": 15.69
+  },
+  "country": {
+    "genre": "country",
+    "prompt": "An upbeat country instrumental groove, fingerpicked acoustic guitar, twangy banjo melody, warm electric bass, steady brushed drums, 100 BPM, clean studio recording",
+    "requested_seconds": 12,
+    "model": "facebook/musicgen-small",
+    "seed": 105,
+    "midi": {
+      "notes": 355,
+      "programs": [
+        0,
+        8,
+        24,
+        33,
+        48,
+        65
+      ],
+      "drums": [
+        36,
+        38,
+        42,
+        45,
+        47,
+        69
+      ]
+    },
+    "everyday": {
+      "path": "listening_20261111/country/everyday.wav",
+      "rendered_notes": 355,
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "mixed": {
+      "path": "listening_20261111/country/mixed.wav",
+      "rendered_notes": 355,
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "status": "completed",
+    "elapsed_seconds": 13.31
+  },
+  "pop": {
+    "genre": "pop",
+    "prompt": "A bright catchy pop instrumental, bouncy piano chords, simple memorable synth melody, warm bass line, punchy kick and snare, steady hi hats, 115 BPM, clean studio recording",
+    "requested_seconds": 12,
+    "model": "facebook/musicgen-small",
+    "seed": 106,
+    "midi": {
+      "notes": 100,
+      "programs": [],
+      "drums": [
+        36,
+        38,
+        42,
+        43
+      ]
+    },
+    "everyday": {
+      "path": "listening_20261111/pop/everyday.wav",
+      "rendered_notes": 100,
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "mixed": {
+      "path": "listening_20261111/pop/mixed.wav",
+      "rendered_notes": 100,
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "status": "completed",
+    "elapsed_seconds": 10.47
+  },
+  "choir": {
+    "genre": "choir",
+    "prompt": "A slow uplifting gospel church hymn, warm choir singing sustained wordless ah harmonies, gentle church organ chords, soft piano, restrained percussion, reverent and peaceful, 75 BPM",
+    "requested_seconds": 12,
+    "model": "facebook/musicgen-small",
+    "seed": 107,
+    "midi": {
+      "notes": 34,
+      "programs": [
+        48
+      ],
+      "drums": []
+    },
+    "everyday": {
+      "path": "listening_20261111/choir/everyday.wav",
+      "rendered_notes": 34,
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "mixed": {
+      "path": "listening_20261111/choir/mixed.wav",
+      "rendered_notes": 34,
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "status": "completed",
+    "elapsed_seconds": 10.0
+  }
+}

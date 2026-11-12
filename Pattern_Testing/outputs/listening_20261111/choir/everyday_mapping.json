@@ -1,0 +1,64 @@
+{
+  "mapping": {
+    "programs": {
+      "48": {
+        "file": "glass_clink.wav",
+        "root_note": 84,
+        "loop": false
+      }
+    },
+    "drums": {}
+  },
+  "assignments": [
+    {
+      "kind": "program",
+      "number": 48,
+      "file": "glass_clink.wav",
+      "input_index": 5,
+      "class": "Chink, clink",
+      "preferred_instrument": "Glockenspiel",
+      "user_corrected": false,
+      "reason": "same_kind_fallback"
+    }
+  ],
+  "skipped_sounds": [],
+  "unused_sounds": [
+    {
+      "input_index": 0,
+      "file": "door_knock.wav"
+    },
+    {
+      "input_index": 1,
+      "file": "finger_snap.wav"
+    },
+    {
+      "input_index": 2,
+      "file": "hand_clap.wav"
+    },
+    {
+      "input_index": 3,
+      "file": "key_jingle.wav"
+    },
+    {
+      "input_index": 4,
+      "file": "coin_drop.wav"
+    },
+    {
+      "input_index": 6,
+      "file": "water_drop.wav"
+    },
+    {
+      "input_index": 7,
+      "file": "paper_crumple.wav"
+    },
+    {
+      "input_index": 8,
+      "file": "zipper_pull.wav"
+    },
+    {
+      "input_index": 9,
+      "file": "switch_click.wav"
+    }
+  ],
+  "unmapped": []
+}

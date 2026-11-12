@@ -63,8 +63,8 @@ otherwise the first input wins. No randomness or confidence weighting is used.
 Run from `pattern_testing` with the shared environment:
 
 ```powershell
-.venv/Scripts/python Apply_Sounds/yamnet_mapping.py Sounds/everyday_classifications.json --midi MIDI_sequences/jazz.mid --output Apply_Sounds/everyday_sound_map.json --report outputs/everyday_mapping_report.json
-.venv/Scripts/python Apply_Sounds/render_midi_sounds.py "../MIDI_sequences/jazz.mid" --mapping everyday_sound_map.json --output everyday_jazz_classified.wav
+.venv/Scripts/python Apply_Sounds/yamnet_mapping.py Sounds/everyday_classifications.json --midi outputs/local/transcribed.mid --output outputs/local/mapping.json --report outputs/local/mapping_report.json
+.venv/Scripts/python Apply_Sounds/render_midi_sounds.py "../outputs/local/transcribed.mid" --mapping "../outputs/local/mapping.json" --output-dir "../outputs/local" --output rendered.wav
 ```
 
 `Sounds/everyday_classifications.json` contains manually assigned example
@@ -91,8 +91,8 @@ Callable equivalent:
 from Apply_Sounds.yamnet_mapping import build_sound_mapping
 from Apply_Sounds.render_midi_sounds import apply_sounds
 
-report = build_sound_mapping(classified_sounds, "MIDI_sequences/jazz.mid")
-apply_sounds("MIDI_sequences/jazz.mid", report["mapping"], "outputs/classified.wav",
+report = build_sound_mapping(classified_sounds, "outputs/local/transcribed.mid")
+apply_sounds("outputs/local/transcribed.mid", report["mapping"], "outputs/classified.wav",
              sounds_dir="Sounds")
 ```
 

@@ -1,0 +1,401 @@
+{
+  "path_base": "outputs/",
+  "cache_included": false,
+  "media": [
+    {
+      "path": "listening_20261111/chatgpt_midi/handwritten_trap.mid",
+      "bytes": 864,
+      "sha256": "e13d3ec0c260d1cfb294b215278a437f5a01808084c0276cab3bb297388f258a"
+    },
+    {
+      "path": "listening_20261111/chatgpt_midi/handwritten_trap.wav",
+      "bytes": 1764044,
+      "sha256": "50467cf0a0a01d42f56e29c0ebbd0fecffdf1a6f62176d611d82203508ea8170",
+      "duration_seconds": 10.0,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/chatgpt_midi/handwritten_trap_everyday.wav",
+      "bytes": 1764044,
+      "sha256": "648a0839967ba5f4b74fd3710ac8df3e5716620f5dc11c6608ae2d2364d05d7c",
+      "duration_seconds": 10.0,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/choir/everyday.wav",
+      "bytes": 2138084,
+      "sha256": "784e665b5e866d2bbf43bd9b689707212185b47f70b1936bf26493b3099f14bb",
+      "duration_seconds": 12.12,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/choir/everyday_smoothed.wav",
+      "bytes": 2138084,
+      "sha256": "78cb2c3df25d18c862aeb3275a637c214adb5c144c37f8df99a7fa19e05a72c9",
+      "duration_seconds": 12.12,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/choir/mixed.wav",
+      "bytes": 2138084,
+      "sha256": "784e665b5e866d2bbf43bd9b689707212185b47f70b1936bf26493b3099f14bb",
+      "duration_seconds": 12.12,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/choir/mixed_smoothed.wav",
+      "bytes": 2138084,
+      "sha256": "78cb2c3df25d18c862aeb3275a637c214adb5c144c37f8df99a7fa19e05a72c9",
+      "duration_seconds": 12.12,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/choir/original.wav",
+      "bytes": 764204,
+      "sha256": "4e89990a5b63be5cc51eec3f2ca5936b16c22a4c59c0efc88e89ee8c77762ccc",
+      "duration_seconds": 11.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "listening_20261111/choir/transcribed.mid",
+      "bytes": 299,
+      "sha256": "429968219233dc757496f03aa46fdf5b978ce5705b7d239cb02a2ecad4234e0b"
+    },
+    {
+      "path": "listening_20261111/country/everyday.wav",
+      "bytes": 2296736,
+      "sha256": "336e0aa32e73f74d31372a9d7b2da4478ada90f4326d43dd2488b5af8efe1a22",
+      "duration_seconds": 13.02,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/country/everyday_smoothed.wav",
+      "bytes": 2296736,
+      "sha256": "fe1b8ba00df1c8ecac644857cd94158690d8f91379bb1e4bb4306287b380409a",
+      "duration_seconds": 13.02,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/country/mixed.wav",
+      "bytes": 2296736,
+      "sha256": "d7f12f0475e16a9602e9515563711b9f63c9873ed8ec20a328bc56e629d7f27a",
+      "duration_seconds": 13.02,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/country/mixed_smoothed.wav",
+      "bytes": 2296736,
+      "sha256": "61086e24d53ba8ff95db6bdeb5112f7577380797a9eb285175ed866d086924b6",
+      "duration_seconds": 13.02,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/country/original.wav",
+      "bytes": 764204,
+      "sha256": "e02848def9ac00c224fa186869fc2dc33af7282759aecfad2be2cbf30b09ce85",
+      "duration_seconds": 11.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "listening_20261111/country/transcribed.mid",
+      "bytes": 2982,
+      "sha256": "d924b5f0c79a8b90131cb9beff27e48552d08d03c1d9c8cb357912f15b05df4d"
+    },
+    {
+      "path": "listening_20261111/pop/everyday.wav",
+      "bytes": 2160944,
+      "sha256": "5982d299b6c7fa7fc5a3977b73aad852a9444610ede6d9c33986ac701abf78fd",
+      "duration_seconds": 12.25,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/pop/everyday_smoothed.wav",
+      "bytes": 2160944,
+      "sha256": "59084184f38e91af0d103b5d550945ecda1f1a0dcda59521927a39f79237ab0f",
+      "duration_seconds": 12.25,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/pop/mixed.wav",
+      "bytes": 2134836,
+      "sha256": "8335db0727acb7f704198889d82bb74980c7ee1caf06885867fdc39bc7e9672b",
+      "duration_seconds": 12.102,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/pop/mixed_smoothed.wav",
+      "bytes": 2134836,
+      "sha256": "c17f36247762a4099bbde9ac832c6afe7955c7fd87c776092e9cdcf4d649fee4",
+      "duration_seconds": 12.102,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/pop/original.wav",
+      "bytes": 764204,
+      "sha256": "a6242e10a0e0329e3e1579d8ca233791071bccf16238aa38cd8b670769d3b053",
+      "duration_seconds": 11.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "listening_20261111/pop/transcribed.mid",
+      "bytes": 845,
+      "sha256": "31a2ac87756ff97362fd7c1129bcf0c4976d3e9ddb4f8bfec81f217f22d92339"
+    },
+    {
+      "path": "listening_20261111/trap/everyday.wav",
+      "bytes": 1647548,
+      "sha256": "92f5af29e63369279fa9bea723eb44eca5e05a5e712835bf71f7eb2f57859112",
+      "duration_seconds": 9.34,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/trap/everyday_smoothed.wav",
+      "bytes": 1647548,
+      "sha256": "b473bc318d97a11ea8817bf92da8f4890a7850115cc90c2c8481f28c13a7aa19",
+      "duration_seconds": 9.34,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/trap/mixed.wav",
+      "bytes": 1647548,
+      "sha256": "80026640aed1c7ca76f5f40125dec7eaa5e2ceb0e9e9cc9c52be84aa28351a2c",
+      "duration_seconds": 9.34,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/trap/mixed_smoothed.wav",
+      "bytes": 1647548,
+      "sha256": "4c1a16c478078e1417922ee8c2692c676f1aa8fa05b311ad4848b31f8b5d7594",
+      "duration_seconds": 9.34,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_20261111/trap/original.wav",
+      "bytes": 764204,
+      "sha256": "53918511cd4e95eb5acefb7597cbb06ed715a644abfdaa0019da8a75d28a4964",
+      "duration_seconds": 11.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "listening_20261111/trap/transcribed.mid",
+      "bytes": 182,
+      "sha256": "a853772277fc6eae4472637b1c0355055caa4a0b1fd59fbe040212c73dbf139d"
+    },
+    {
+      "path": "listening_focused_20261111/latin_bossa_90/everyday.wav",
+      "bytes": 2836592,
+      "sha256": "1a9658e68ba42b50a9989cfa01ae6f81ea7231b3df08d03fef00cf114a944627",
+      "duration_seconds": 16.08,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_focused_20261111/latin_bossa_90/mixed.wav",
+      "bytes": 2836592,
+      "sha256": "1a9658e68ba42b50a9989cfa01ae6f81ea7231b3df08d03fef00cf114a944627",
+      "duration_seconds": 16.08,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_focused_20261111/latin_bossa_90/original.wav",
+      "bytes": 1020204,
+      "sha256": "bd6c73fb1046e558627b58beb558b701612420c1cef1144223fc1bb1cea14b57",
+      "duration_seconds": 15.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "listening_focused_20261111/latin_bossa_90/transcribed.mid",
+      "bytes": 604,
+      "sha256": "97b8738ef7a5df123d831f8a0bb137dc3c8a09caa240d7b98b292854d3b619fe"
+    },
+    {
+      "path": "listening_focused_20261111/minimal_house_110/everyday.wav",
+      "bytes": 1196072,
+      "sha256": "3a8b0750e729379e871e49bcc54c528dfb871df235c14a71f0b69436e59c7514",
+      "duration_seconds": 6.78,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_focused_20261111/minimal_house_110/mixed.wav",
+      "bytes": 1169964,
+      "sha256": "c4319f837358abe37136d4b4b9158133ff2620280694005f566c07c1907e6c14",
+      "duration_seconds": 6.632,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "listening_focused_20261111/minimal_house_110/original.wav",
+      "bytes": 1020204,
+      "sha256": "4a0a1cf2b42183839b90b773ac31dece198cfce4aa01c7bd16b757fa1a458b53",
+      "duration_seconds": 15.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "listening_focused_20261111/minimal_house_110/original_attempt1.wav",
+      "bytes": 1020204,
+      "sha256": "1517af4263e4ee849b869a9714e8a2356ed065c8df7cd4dd207a5638ff4abb6a",
+      "duration_seconds": 15.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "listening_focused_20261111/minimal_house_110/transcribed.mid",
+      "bytes": 122,
+      "sha256": "0caadf455feae42d58b9e7dae760a4bb1a2d937ce11526ea379a73618c8ba682"
+    },
+    {
+      "path": "listening_focused_20261111/minimal_house_110/transcribed_attempt1.mid",
+      "bytes": 26,
+      "sha256": "2327f10c7ed9256c82764df923a79df9025e68a2514af739d99bb0c584fe008a",
+      "note": "Failed first house attempt; empty MIDI kept for provenance"
+    },
+    {
+      "path": "rendered/everyday_jazz.wav",
+      "bytes": 6283132,
+      "sha256": "5a556ecce9454ee4f8a1b790c8097d18e42c47fbf113b2cf1426deb603689fc2",
+      "duration_seconds": 35.618,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "rendered/everyday_jazz_classified.wav",
+      "bytes": 6283136,
+      "sha256": "1b024df4066b8364ab5644373b9c880e5fe69a70fe886193ad168649b2a629ca",
+      "duration_seconds": 35.618,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "simple_trap_retry/listen.wav",
+      "bytes": 1605176,
+      "sha256": "595258544373cafeb73692c3ff97d60464a6c7651869dbdca3ee83a5a1985817",
+      "duration_seconds": 9.099,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "simple_trap_retry/one_shots/door_knock.wav",
+      "bytes": 14156,
+      "sha256": "906883e2d09862827174caec63688207a91099da0c1749cc6a4a7ab933d327b3",
+      "duration_seconds": 0.16,
+      "sample_rate": 44100,
+      "channels": 1
+    },
+    {
+      "path": "simple_trap_retry/one_shots/finger_snap.wav",
+      "bytes": 15920,
+      "sha256": "db9263ea3752c3e80ccf5980bc650dd3b13d4103799cb292d37e175820e01d18",
+      "duration_seconds": 0.18,
+      "sample_rate": 44100,
+      "channels": 1
+    },
+    {
+      "path": "simple_trap_retry/one_shots/hand_clap.wav",
+      "bytes": 21212,
+      "sha256": "1bdaa4e800ba8d5143da79bc4a20dfdbf60e17ba07ce08f5871ca8468220287e",
+      "duration_seconds": 0.24,
+      "sample_rate": 44100,
+      "channels": 1
+    },
+    {
+      "path": "simple_trap_retry/one_shots/switch_click.wav",
+      "bytes": 8864,
+      "sha256": "b3517d3edbce3336321ac40a098f5150de055e204461a9c987dfef1d3a934c54",
+      "duration_seconds": 0.1,
+      "sample_rate": 44100,
+      "channels": 1
+    },
+    {
+      "path": "simple_trap_retry/take_501/everyday.wav",
+      "bytes": 2079728,
+      "sha256": "cac096e8b114db2d847a33e613ca58666e5c6a7013ef0b2bd73e02eb4c97b99b",
+      "duration_seconds": 11.79,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "simple_trap_retry/take_501/everyday_tight.wav",
+      "bytes": 1988000,
+      "sha256": "0b08ab86bf4c8fe6ae37db7d97637c464bb1734d62be7ed46a4e84d61d24b219",
+      "duration_seconds": 11.27,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "simple_trap_retry/take_501/mixed.wav",
+      "bytes": 2053620,
+      "sha256": "776cbee5c4a1ea29f71aa3b43a282f2cbb8cb90af2ee7c4ad14a1858a2000961",
+      "duration_seconds": 11.642,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "simple_trap_retry/take_501/original.wav",
+      "bytes": 764204,
+      "sha256": "9ed4ff560642208ffc74b0aba777494e24dfa4b30bfa69d0cd905560db288033",
+      "duration_seconds": 11.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "simple_trap_retry/take_501/transcribed.mid",
+      "bytes": 488,
+      "sha256": "cf01f2c40dd010f1ebdb11975ba78eb2d30626cfdeb059adc47270ad50a7ca73"
+    },
+    {
+      "path": "simple_trap_retry/take_502/everyday.wav",
+      "bytes": 1952756,
+      "sha256": "a355bfbc21904b93b96793865127852cd44c559636a0c0c557469dc7790970de",
+      "duration_seconds": 11.07,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "simple_trap_retry/take_502/mixed.wav",
+      "bytes": 1926648,
+      "sha256": "964e51df414242fca836095217c633f40975d5322b4171176d0f388cc2476a29",
+      "duration_seconds": 10.922,
+      "sample_rate": 44100,
+      "channels": 2
+    },
+    {
+      "path": "simple_trap_retry/take_502/original.wav",
+      "bytes": 764204,
+      "sha256": "c0a0a9548de77d092ff6dbf258cf979f2b8f5d579e23edcca441fcfeb30547b5",
+      "duration_seconds": 11.94,
+      "sample_rate": 32000,
+      "channels": 1
+    },
+    {
+      "path": "simple_trap_retry/take_502/transcribed.mid",
+      "bytes": 305,
+      "sha256": "cfabe8fa53524e931142c90102573440610603be6e09796eb2e3f59ed5b6684e"
+    }
+  ]
+}

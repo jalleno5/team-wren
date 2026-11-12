@@ -1,0 +1,33 @@
+{
+  "genre": "trap",
+  "prompt": "A dark instrumental trap beat, deep 808 bass, crisp snare backbeats, fast rolling hi hats, sparse minor key piano melody, 140 BPM, clean studio recording",
+  "requested_seconds": 12,
+  "model": "facebook/musicgen-small",
+  "seed": 104,
+  "midi": {
+    "notes": 16,
+    "programs": [],
+    "drums": [
+      36,
+      38,
+      42,
+      45,
+      47,
+      48
+    ]
+  },
+  "everyday": {
+    "path": "listening_20261111/trap/everyday.wav",
+    "rendered_notes": 16,
+    "unmapped_programs": [],
+    "unmapped_drums": []
+  },
+  "mixed": {
+    "path": "listening_20261111/trap/mixed.wav",
+    "rendered_notes": 16,
+    "unmapped_programs": [],
+    "unmapped_drums": []
+  },
+  "status": "completed",
+  "elapsed_seconds": 15.69
+}

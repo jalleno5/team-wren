@@ -25,11 +25,13 @@ sounds are mostly unpitched and work best as percussion.
 From `pattern_testing`, try the example mapping on an existing MIDI:
 
 ```powershell
-.venv/Scripts/python Apply_Sounds/render_midi_sounds.py "../MIDI_sequences/jazz.mid" --mapping everyday_sound_map.json --output everyday_jazz.wav
+.venv/Scripts/python Apply_Sounds/yamnet_mapping.py Sounds/everyday_classifications.json --midi outputs/local/transcribed.mid --output outputs/local/mapping.json
+.venv/Scripts/python Apply_Sounds/render_midi_sounds.py "../outputs/local/transcribed.mid" --mapping "../outputs/local/mapping.json" --output-dir "../outputs/local" --output rendered.wav
 ```
 
-Output: `outputs/rendered/everyday_jazz.wav`. The example mapping is generated
-from `everyday_classifications.json` and the instruments used by `jazz.mid`.
+First generate the MIDI using the main README's local pipeline command.
+Output: `outputs/local/rendered.wav`. The example mapping is generated
+from `everyday_classifications.json` and the instruments used by that MIDI.
 Those labels are manually supplied examples, not model inference results.
 See [YAMNet mapping](../Apply_Sounds/yamnet/README.md) to regenerate it for another
 MIDI or use your actual YAMNet/user-corrected classes. The report explains any

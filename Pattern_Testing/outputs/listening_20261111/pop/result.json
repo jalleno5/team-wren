@@ -1,0 +1,31 @@
+{
+  "genre": "pop",
+  "prompt": "A bright catchy pop instrumental, bouncy piano chords, simple memorable synth melody, warm bass line, punchy kick and snare, steady hi hats, 115 BPM, clean studio recording",
+  "requested_seconds": 12,
+  "model": "facebook/musicgen-small",
+  "seed": 106,
+  "midi": {
+    "notes": 100,
+    "programs": [],
+    "drums": [
+      36,
+      38,
+      42,
+      43
+    ]
+  },
+  "everyday": {
+    "path": "listening_20261111/pop/everyday.wav",
+    "rendered_notes": 100,
+    "unmapped_programs": [],
+    "unmapped_drums": []
+  },
+  "mixed": {
+    "path": "listening_20261111/pop/mixed.wav",
+    "rendered_notes": 100,
+    "unmapped_programs": [],
+    "unmapped_drums": []
+  },
+  "status": "completed",
+  "elapsed_seconds": 10.47
+}

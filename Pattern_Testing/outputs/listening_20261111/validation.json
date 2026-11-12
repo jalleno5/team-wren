@@ -1,0 +1,70 @@
+{
+  "trap": {
+    "midi_notes": 16,
+    "files": {
+      "original": {
+        "seconds": 11.94,
+        "peak": 1.0
+      },
+      "everyday": {
+        "seconds": 9.34,
+        "peak": 0.98
+      },
+      "mixed": {
+        "seconds": 9.34,
+        "peak": 0.98
+      }
+    }
+  },
+  "country": {
+    "midi_notes": 355,
+    "files": {
+      "original": {
+        "seconds": 11.94,
+        "peak": 0.874
+      },
+      "everyday": {
+        "seconds": 13.02,
+        "peak": 0.98
+      },
+      "mixed": {
+        "seconds": 13.02,
+        "peak": 0.98
+      }
+    }
+  },
+  "pop": {
+    "midi_notes": 100,
+    "files": {
+      "original": {
+        "seconds": 11.94,
+        "peak": 0.805
+      },
+      "everyday": {
+        "seconds": 12.25,
+        "peak": 0.98
+      },
+      "mixed": {
+        "seconds": 12.1,
+        "peak": 0.98
+      }
+    }
+  },
+  "choir": {
+    "midi_notes": 34,
+    "files": {
+      "original": {
+        "seconds": 11.94,
+        "peak": 0.211
+      },
+      "everyday": {
+        "seconds": 12.12,
+        "peak": 0.98
+      },
+      "mixed": {
+        "seconds": 12.12,
+        "peak": 0.98
+      }
+    }
+  }
+}
