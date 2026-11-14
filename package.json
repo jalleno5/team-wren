@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "mock-api": "node mock-server/server.js",
     "test": "vitest",
     "test:run": "vitest run"
   },
