@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open the printed localhost URL. Authentication and backend operations use explicit not-configured adapters and never make network requests. Each route can also be opened directly:
+Copy `.env.example` to `.env.local` to enable Supabase Google authentication. Data operations call relative `/api` endpoints; during development Vite proxies them to a separately running API on port 3001. This frontend-only branch does not contain that server, so read failures retain fixtures and missing capabilities produce explicit errors. Each route can also be opened directly:
 
 - `/login`
 - `/library`
@@ -19,25 +19,25 @@ Open the printed localhost URL. Authentication and backend operations use explic
 - `/beat`
 - `/profile`
 
-`npm run build` produces a static build; `npm run preview` serves it. No API keys or backend configuration are required. Fonts are bundled locally.
+`npm run build` produces a static build; `npm run preview` serves it. Google sign-in requires Supabase configuration, while guest mode and the development bypass remain available without it. Fonts are bundled locally.
 
 ## Included interactions
 
-Screen navigation, transient library selection, local fixture search, disclosure panels, info tooltips, and responsive layouts are included. Microphone recording requests browser permission, counts down from three, captures 1.5 seconds with `MediaRecorder`, and provides a local review player before the upload adapter is called. The beat page presents the generated-audio contract as a waveform player and enables playback/export when a future service supplies URLs.
+Screen navigation, session-scoped sound selection, API-backed library search, info tooltips, and responsive layouts are included. The Parameters step remains locked until at least one sound is selected, and Listen & export remains locked until generation succeeds. Microphone recording requests browser permission, counts down from three, captures 1.5 seconds with `MediaRecorder`, and provides a named local review before the signed-upload adapter is called. The beat page polls queued jobs and enables playback/download when the backend supplies the required URLs.
 
-Recorded sounds can be trimmed by dragging the left and right edges of the waveform before saving; the handles also support arrow-key adjustment. When the Supabase variables in `.env.example` are configured, the library is populated from the `sounds` table and sample flags are inserted into `sound_flags`; otherwise the fixture-backed prototype and explicit not-configured messages remain visible.
+Recorded sounds can be trimmed by dragging the left and right edges of the waveform before saving; the handles also support arrow-key adjustment. On save, the browser decodes the recording, extracts only that selection, and encodes a PCM WAV blob, so unselected audio is never passed to the upload adapter. Supabase is used only for authentication in the browser. Profile, sound, report, and beat data goes through the typed `/api` client, and reports retain the mock backend's `sound_reports.description` model.
 
-The sign-in screen also offers guest mode. Guests can browse and select community sounds and generate/listen to a beat, while private sounds, recording, and MP3 export open a sign-in prompt.
+The sign-in screen also offers guest mode. Guests can browse and select up to four community sounds and generate/listen to a beat, while private sounds, recording, reporting, Profile, and direct download open a sign-in prompt.
 
 During `npm run dev`, the sign-in page includes a clearly labeled testing bypass that starts a member-mode session. Vite removes this control from production builds.
 
-Beat parameters include a selectable 1-, 2-, or 4-bar length that is sent to the generation service as `lengthBars`.
+Beat generation currently sends only tempo/speed, genre, selected sound IDs, and an optional title. Unsupported length and advanced controls are intentionally hidden.
 
 ## Not implemented
 
-There is no real authentication, persistence, server upload, sharing, deletion, moderation, beat generation, or MP3 export. Those controls call typed adapters in `src/services.ts`, which reject with `ServiceNotConfiguredError`. Recorded browser audio exists only as a temporary object URL until a production upload adapter is installed.
+The current mock backend still lacks signed uploads, sound playback metadata, served audio, guest credentials/limits, beat claiming, and authenticated direct-download URLs. The frontend calls the documented future contracts and reports `BackendCapabilityError` when a route is absent; it never returns mock success for those operations.
 
-There are no network integrations, local-storage calls, IndexedDB records, or account sessions. Prior local data from earlier iterations is not read, modified, or cleared by this prototype.
+Workflow state is session-scoped and no IndexedDB or durable browser database is used. Prior browser-local records from earlier iterations are not read, modified, or cleared.
 
 ## Building functionality separately
 

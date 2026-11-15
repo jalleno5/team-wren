@@ -4005,6 +4005,18 @@ input::placeholder {
   color: #ffffff;
 }
 
+.workflow-step>a.disabled {
+  color: #7b8499;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.workflow-step>a.disabled>span,
+.workflow-step>a.disabled:hover>span {
+  background: #e1e5ef;
+  color: #8a91a1;
+}
+
 .workflow-step>a:hover>span {
   background: #b9cbf4;
   color: #1c3470;
@@ -4434,5 +4446,257 @@ select {
   .flag-dialog-actions .button {
     flex: 1 1 130px;
     min-width: 0;
+  }
+}
+
+.recording-title {
+  text-align: left;
+  width: 100%;
+}
+
+.form-stack input[readonly] {
+  background: #f4f6fd;
+}
+
+.recording-title input {
+  background: #fff;
+}
+
+.field-help {
+  color: #66708f;
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+/* The supplied Encore artwork has a square white canvas. These wrappers crop
+   the canvas without changing the source files, so both lockups stay crisp. */
+.brand-logo {
+  display: block;
+  flex: 0 0 auto;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.brand-logo:not(.compact) {
+  background: #fff;
+  border-radius: 18px;
+  height: 124px;
+  width: min(320px, 100%);
+}
+
+.brand-wordmark-art,
+.brand-mark-art {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.brand-wordmark-art {
+  background: url('/encore-wordmark.png') 50% 50% / 98% auto no-repeat;
+}
+
+.brand-logo.compact {
+  background: #fff;
+  border-radius: 14px;
+  height: 54px;
+  width: 140px;
+}
+
+.brand-mark-art {
+  background: url('/encore-mark.png') 15% 42% / 220% auto no-repeat;
+}
+
+.page-heading .section-heading {
+  flex: 1 1 320px;
+}
+
+.page-heading h1 {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.page-heading .heading-actions {
+  flex: 0 0 auto;
+}
+
+.library-page .page-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.library-page .heading-actions {
+  width: auto;
+}
+
+@media (max-width: 700px) {
+  .app-header-inner {
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .brand-logo.compact {
+    border-radius: 10px;
+    height: 42px;
+    width: 110px;
+  }
+
+  .app-nav {
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .app-nav a {
+    font-size: 12px;
+    gap: 6px;
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+
+  .workspace {
+    overflow-x: hidden;
+  }
+
+  .page {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .workflow {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .page-heading {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .page-heading .section-heading {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .library-page .page-heading {
+    display: flex;
+  }
+
+  .library-page .heading-actions {
+    width: 100%;
+  }
+
+  .page-heading h1 {
+    font-size: clamp(28px, 9vw, 36px);
+    overflow-wrap: normal;
+  }
+
+  .library-controls,
+  .library-tab-actions,
+  .library-tools,
+  .parameters-layout,
+  .audio-output-card,
+  .profile-panel,
+  .capture-zone,
+  .trim-editor {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .library-page .sound-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .library-page .library-layout {
+    flex-direction: column;
+  }
+
+  .library-page .sound-card {
+    max-width: none;
+    width: 100%;
+  }
+
+  .library-page .beat-tray {
+    position: static;
+  }
+
+  .modal {
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
+    padding: 20px;
+    width: calc(100vw - 24px);
+  }
+
+  .audio-output-heading {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .login {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100dvh;
+  }
+
+  .login-brand {
+    min-height: auto;
+    padding: 24px 20px 18px;
+  }
+
+  .login-brand .brand-logo {
+    height: 105px;
+    width: min(270px, 100%);
+  }
+
+  .login-brand h1 {
+    font-size: clamp(36px, 12vw, 54px);
+    margin-top: 12px;
+  }
+
+  .login-form {
+    align-items: flex-start;
+    padding: 22px 16px 34px;
+  }
+
+  .login-card {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-nav a {
+    justify-content: center;
+    padding: 8px;
+    width: 42px;
+  }
+
+  .app-nav a > span:not(.avatar):not(.guest-avatar) {
+    display: none;
+  }
+
+  .sound-card-bottom > * {
+    flex: 1 1 100%;
+  }
+
+  .modal-actions,
+  .flag-dialog-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions > *,
+  .flag-dialog-actions > * {
+    width: 100%;
+  }
+
+  .flag-dialog-intro,
+  .audio-output-heading,
+  .profile-avatar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .audio-output-heading .button {
+    width: 100%;
   }
 }

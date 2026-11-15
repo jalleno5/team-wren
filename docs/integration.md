@@ -1,47 +1,100 @@
-# Frontend service boundaries
+# Frontend integration contract
 
-Encore keeps production integrations behind the interfaces in `src/services.ts`. The checked-in adapters intentionally throw `ServiceNotConfiguredError`; they do not issue network requests or return mock successes.
+The TypeScript frontend uses Supabase only for Google authentication. All
+profile, sound, report, and beat data travels through the application API in
+`src/services.ts`. See [the mock-backend analysis](mock-backend-integration-plan.md)
+for the behavior currently merged into `main` and its Supabase schema gaps.
 
-## Current boundaries
+## Local configuration
 
-- `src/fixtures.ts`: named static samples and decorative waveform data used when reads are unavailable.
-- `src/model.ts`: sound presentation types and parameter-menu options.
-- `src/services.ts`: auth, sound, beat, and profile interfaces plus the stand-in adapters.
-- `src/App.tsx`: UI state, browser microphone capture, accessible dialogs, and adapter calls.
-- `src/styles.css`: visual layouts, theme, and responsive styles. Controls use normal active styling. Form values may change within a screen, while application operations remain unimplemented.
+Copy `.env.example` to `.env.local` and set the Supabase project URL and
+publishable/anon key. Never expose a service-role key to Vite.
 
-## Future functionality to build independently
+`VITE_API_BASE_URL` is optional. When it is blank, the app calls relative
+`/api/*` paths and the development server proxies them to
+`http://localhost:3001`. This branch intentionally does not contain or modify
+the mock server; it will arrive in a later merge.
 
-| Screen | Future responsibilities |
+The API client adds `Authorization: Bearer <Supabase access token>` for member
+requests and `X-Guest-Job-Token` when polling or claiming a guest beat. It
+supports JSON responses, empty `204` responses, abort signals, and `{ error }`
+error bodies.
+
+## Implemented API mappings
+
+| Frontend operation | API contract |
 | --- | --- |
-| Login | Replace `AuthService` with a Supabase client adapter. `signInWithGoogle` should call `supabase.auth.signInWithOAuth({ provider: 'google' })`; `signOut` should call `supabase.auth.signOut()`. |
-| Library | The included adapter reads `sounds`, uploads blobs to the configured Storage bucket, updates sound visibility, and inserts moderation requests into `sound_flags`. |
-| Parameters | Implement `BeatService.generate`; its parameter payload includes `lengthBars` (1, 2, or 4), and it returns a stable beat ID only when generation is accepted. |
-| Audio output | Implement `getOutput` with `{ id, name, audioUrl, durationSeconds, waveform, downloadUrl }`. URLs may be signed and short-lived. |
-| Profile | Implement `ProfileService` for profile reads, edits, and photo upload. |
+| Get profile | `GET /api/profile` |
+| Update username | `PATCH /api/profile` with `{ username }`; email is read-only |
+| List sounds | `GET /api/sounds?scope=mine|public`; search is filtered in the browser |
+| Change visibility/title | `PATCH /api/sounds/:id` |
+| Delete a sound | `DELETE /api/sounds/:id` |
+| Report a sound | `POST /api/sounds/:id/reports` with `{ description }` |
+| Queue a beat | `POST /api/beats` with `{ title?, speed, genre, sound_ids }` |
+| Poll a beat | `GET /api/beats/:id`, once per second for at most 60 seconds |
 
-Keep the exported interfaces stable when adding production adapters. Reads may replace fixtures after a successful response; failed writes must not mutate the displayed fixtures. Generation navigates to `/beat?id=<beat-id>` only after the service resolves.
+Wire fields are mapped at the service boundary: sound `title` becomes UI
+`name`, tempo becomes beat `speed`, and the selected report reason becomes
+`description`. Ownership is calculated from the current profile ID. Missing
+creator/waveform fields receive presentation-only labels and waveform values;
+they are never written back as real backend data.
 
-## Browser recording lifecycle
+Read failures retain the checked-in fixtures so the layout remains usable.
+Write failures never mutate fixture or displayed records.
 
-The recorder requests microphone permission before the countdown, displays 3–2–1, records for 1.5 seconds, stops every media track, and creates a temporary object URL for review. Closing, retrying, or unmounting clears timers, stops tracks, and revokes the object URL. The object URL is not persistence; the production upload adapter must send the supplied blob and return the created sound.
+## Required backend capabilities not yet present
 
-Before saving, the review screen exposes draggable handles on both edges of the waveform. The handles support pointer and arrow-key input. The selected values are sent as `trim_start_seconds` and `trim_end_seconds`, stored with the sound row, and honored by sample playback.
+The frontend defines these calls but converts a missing route into an explicit
+`BackendCapabilityError`:
 
-## Guest access
+| Capability | Expected contract |
+| --- | --- |
+| Signed upload | `POST /api/uploads` with `{ purpose: "sound" | "avatar", content_type, size_bytes }` returns `{ upload_url, storage_path, headers? }`; the browser then `PUT`s the file |
+| Sound playback | `GET /api/sounds/:id/playback` returns `{ url, trim_start_seconds?, trim_end_seconds? }` |
+| Guest beat creation | `POST /api/beats` returns `{ id, status, guest_token }` when unauthenticated |
+| Guest polling | `GET /api/beats/:id` with `X-Guest-Job-Token` |
+| Claim after login | Idempotent `POST /api/beats/:id/claim` with the guest-token header returns the claimed beat |
+| Authenticated download | `GET /api/beats/:id/download` returns `{ url }` for the stored generated file |
 
-Choosing guest mode stores a session-scoped access flag. Guest sessions are restricted to public sounds; attempts to open the private library, record a sound, or export an MP3 produce a sign-in dialog. A successful production Google sign-in must replace the flag with `member` before routing to the library.
+The backend must also provide real per-user JWT verification, public-only guest
+authorization, creator joins, trim/storage metadata, served audio, durable job
+state, and complete beat duration/output metadata.
 
-## Supabase table contract
+Guest jobs expire after one hour and are limited to ten generations per IP per
+rolling hour. The future backend constants must retain an explanatory comment:
 
-Copy `.env.example` to `.env.local` and provide `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to activate the REST adapter. The configured project must expose:
+```js
+// Bound unauthenticated compute/storage: guest jobs expire after 1 hour and
+// each IP may create at most 10 guest generations in a rolling hour.
+const GUEST_JOB_TTL_MS = 60 * 60 * 1000
+const GUEST_GENERATION_LIMIT_PER_HOUR = 10
+```
 
-- `sounds`: `id`, `name`, `creator`, `owned`, `visibility`, `waveform`, `audio_url`, `trim_start_seconds`, `trim_end_seconds`, and `created_at`.
-- `sound_flags`: `id`, `sound_id`, `reason`, `status`, and `created_at`.
-- A public or appropriately signed Storage bucket matching `VITE_SUPABASE_SOUND_BUCKET` (defaults to `sounds`).
+## Browser behavior
 
-Row-level security should allow visitors to select public sounds, authenticated owners to select/update their sounds, and authenticated users to insert flags. Do not expose a service-role key to Vite; the frontend adapter is designed for an anon key plus RLS.
+- Supabase restores sessions on startup and listens for auth changes. Explicit
+  guest mode, selected sounds, the latest successfully generated beat ID, OAuth
+  return path, and a pending guest credential live only in `sessionStorage`.
+- Workflow navigation is sequential: Parameters requires a selected sound, and
+  Listen & export requires a successful generation response. Changing the sound
+  selection invalidates the generated-beat navigation state.
+- Guests may browse public sounds, select 1–4 sounds, generate, poll, and listen.
+  Private sounds, recording, reporting, Profile, and downloads require sign-in.
+- After OAuth, the app returns to the beat and claims it before enabling direct
+  download. A failed claim retains the credential for retry.
+- Recording requests microphone permission, announces 3–2–1, records for 1.5
+  seconds, releases tracks, and permits handle-based trimming. Saving requires a
+  title, decodes and clips the selected range into a PCM WAV blob in the browser,
+  then sends only that clipped blob through the signed-upload contract above.
+  Since the uploaded file begins at the selection boundary, its trim metadata is
+  normalized to zero through the clipped duration.
+- Beat generation sends only tempo/speed, genre, selected sound IDs, and an
+  optional title. Unsupported length and advanced controls are not shown.
 
-Fermata's conditioning vocabulary is represented as select-menu options only. The fixed pattern is an illustration, not model output. There is no model execution, MIDI/audio conversion, or sound classification.
+## Later merge notes
 
-Earlier versions of the app may have left browser-local records on the same origin. This navigation prototype does not access or erase them.
+Do not resolve main-branch conflicts on this frontend-only branch. The later
+merge is expected to reconcile `.env.example`, `package.json`, the lockfile,
+Vite configuration, and duplicate JSX/TypeScript entrypoints. Preserve this
+branch's TypeScript application and `/api` service boundary while retaining the
+mock server and migrations from `main`.

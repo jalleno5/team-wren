@@ -12,9 +12,10 @@ export const sounds:SoundView[] = [
   {id:'paper',name:'Paper bag shuffle',creator:'Noah Kim',owned:false,visibility:'public',waveform},
 ];
 export const selectedSounds = sounds.slice(0,2);
-export const outputPreview:Omit<BeatOutput,'audioUrl'|'downloadUrl'> = {
+export const outputPreview:Omit<BeatOutput,'audioUrl'> = {
   id:'preview-beat',
   name:'Untitled Beat',
+  status:'completed',
   durationSeconds:8,
   waveform:[0.18,0.44,0.72,0.3,0.88,0.56,0.34,0.76,0.48,0.92,0.38,0.68,0.25,0.82,0.58,0.4,0.7,0.32,0.9,0.52,0.28,0.64,0.42,0.78,0.36,0.86,0.5,0.3,0.74,0.46,0.8,0.26,0.62,0.4,0.84,0.54,0.34,0.7,0.48,0.9,0.3,0.66,0.44,0.76,0.38,0.82,0.52,0.28],
 };
