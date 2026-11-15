@@ -12,8 +12,9 @@ publishable/anon key. Never expose a service-role key to Vite.
 
 `VITE_API_BASE_URL` is optional. When it is blank, the app calls relative
 `/api/*` paths and the development server proxies them to
-`http://localhost:3001`. This branch intentionally does not contain or modify
-the mock server; it will arrive in a later merge.
+`http://localhost:3001`. Start the real API with `npm run api` (code in
+`server/`, reads `.env.local`) or the in-memory mock with `npm run mock-api`.
+Both listen on port 3001.
 
 The API client adds `Authorization: Bearer <Supabase access token>` for member
 requests and `X-Guest-Job-Token` when polling or claiming a guest beat. It
@@ -29,7 +30,9 @@ error bodies.
 | List sounds | `GET /api/sounds?scope=mine|public`; search is filtered in the browser |
 | Change visibility/title | `PATCH /api/sounds/:id` |
 | Delete a sound | `DELETE /api/sounds/:id` |
-| Report a sound | `POST /api/sounds/:id/reports` with `{ description }` |
+| Report a sound | `POST /api/sounds/:id/reports` with `{ description }`; stored as `sound_reports.reason` |
+| Signed upload | `POST /api/uploads` with `{ purpose: "sound", content_type, size_bytes }` returns `{ upload_url, storage_path, headers? }`; the browser then `PUT`s the file and calls `POST /api/sounds` |
+| Sound playback | `GET /api/sounds/:id/playback` returns `{ url, trim_start_seconds }` (a signed link valid for 1 hour) |
 | Queue a beat | `POST /api/beats` with `{ title?, speed, genre, sound_ids }` |
 | Poll a beat | `GET /api/beats/:id`, once per second for at most 60 seconds |
 
@@ -49,25 +52,23 @@ The frontend defines these calls but converts a missing route into an explicit
 
 | Capability | Expected contract |
 | --- | --- |
-| Signed upload | `POST /api/uploads` with `{ purpose: "sound" | "avatar", content_type, size_bytes }` returns `{ upload_url, storage_path, headers? }`; the browser then `PUT`s the file |
-| Sound playback | `GET /api/sounds/:id/playback` returns `{ url, trim_start_seconds?, trim_end_seconds? }` |
+| Avatar upload | `POST /api/uploads` with `purpose: "avatar"` (returns 404 until an avatar bucket exists) |
 | Guest beat creation | `POST /api/beats` returns `{ id, status, guest_token }` when unauthenticated |
 | Guest polling | `GET /api/beats/:id` with `X-Guest-Job-Token` |
 | Claim after login | Idempotent `POST /api/beats/:id/claim` with the guest-token header returns the claimed beat |
 | Authenticated download | `GET /api/beats/:id/download` returns `{ url }` for the stored generated file |
 
-The backend must also provide real per-user JWT verification, public-only guest
-authorization, creator joins, trim/storage metadata, served audio, durable job
-state, and complete beat duration/output metadata.
+The backend must also provide public-only guest authorization, a generation
+worker that moves beats out of `queued`, served beat audio, and complete beat
+duration/output metadata.
 
-Guest jobs expire after one hour and are limited to ten generations per IP per
-rolling hour. The future backend constants must retain an explanatory comment:
+Guest jobs expire after one hour and are limited to two generations per IP per
+rolling hour. These constants live in `server/routes.js`:
 
 ```js
-// Bound unauthenticated compute/storage: guest jobs expire after 1 hour and
-// each IP may create at most 10 guest generations in a rolling hour.
-const GUEST_JOB_TTL_MS = 60 * 60 * 1000
-const GUEST_GENERATION_LIMIT_PER_HOUR = 10
+// bound unauthenticated compute/storage: guest jobs expire after 1 hour and each IP may create at most 2 guest generations in a rolling hour
+export const GUEST_JOB_TTL_MS = 60 * 60 * 1000
+export const GUEST_GENERATION_LIMIT_PER_HOUR = 2
 ```
 
 ## Browser behavior
@@ -91,10 +92,7 @@ const GUEST_GENERATION_LIMIT_PER_HOUR = 10
 - Beat generation sends only tempo/speed, genre, selected sound IDs, and an
   optional title. Unsupported length and advanced controls are not shown.
 
-## Later merge notes
+## Leftover files
 
-Do not resolve main-branch conflicts on this frontend-only branch. The later
-merge is expected to reconcile `.env.example`, `package.json`, the lockfile,
-Vite configuration, and duplicate JSX/TypeScript entrypoints. Preserve this
-branch's TypeScript application and `/api` service boundary while retaining the
-mock server and migrations from `main`.
+`index.html` loads `src/main.tsx`. The older JSX entry files (`src/App.jsx`,
+`src/main.jsx`, `src/App.css`, `src/index.css`) are no longer used.
