@@ -1,0 +1,20 @@
+{
+  "programs": {
+    "38": {
+      "file": "bass.wav",
+      "root_note": 29,
+      "loop": true
+    },
+    "9": {
+      "file": "glass_clink.wav",
+      "root_note": 84,
+      "loop": false
+    }
+  },
+  "drums": {
+    "36": "kick.wav",
+    "38": "hand_clap.wav",
+    "42": "finger_snap.wav",
+    "37": "switch_click.wav"
+  }
+}

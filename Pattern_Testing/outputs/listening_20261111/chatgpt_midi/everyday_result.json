@@ -1,0 +1,15 @@
+{
+  "path": "listening_20261111/chatgpt_midi/handwritten_trap_everyday.wav",
+  "rendered_notes": 85,
+  "sample_preparation": {
+    "target_active_rms_dbfs": -20.0,
+    "max_boost_db": 18.0,
+    "peak_ceiling": 0.9
+  },
+  "unmapped_programs": [],
+  "unmapped_drums": [],
+  "duration_seconds": 10,
+  "bpm": 96,
+  "source": "Same handwritten MIDI; only synthetic everyday foley samples",
+  "pitch_note": "Glass root 84; water-drop sweep reference 86 is approximate"
+}

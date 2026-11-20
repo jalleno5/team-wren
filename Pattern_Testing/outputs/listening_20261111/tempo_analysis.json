@@ -1,0 +1,18 @@
+{
+  "latin_bossa_90": {
+    "requested_bpm": 90,
+    "estimated_audio_bpm": 120.19,
+    "detected_beats": 32,
+    "midi_tempo_metadata_bpm": [],
+    "method": "librosa beat_track on original audio; no target BPM supplied",
+    "note": "Short-clip estimate; half/double-tempo ambiguity is possible. Audio/MIDI were not retimed."
+  },
+  "minimal_house_110": {
+    "requested_bpm": 110,
+    "estimated_audio_bpm": 109.96,
+    "detected_beats": 30,
+    "midi_tempo_metadata_bpm": [],
+    "method": "librosa beat_track on original audio; no target BPM supplied",
+    "note": "Short-clip estimate; half/double-tempo ambiguity is possible. Audio/MIDI were not retimed."
+  }
+}

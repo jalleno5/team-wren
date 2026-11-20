@@ -1,0 +1,76 @@
+{
+  "mapping": {
+    "programs": {},
+    "drums": {
+      "37": {
+        "file": "finger_snap.wav"
+      },
+      "43": {
+        "file": "kick.wav"
+      },
+      "45": {
+        "file": "kick.wav"
+      }
+    }
+  },
+  "assignments": [
+    {
+      "kind": "drum",
+      "number": 37,
+      "file": "finger_snap.wav",
+      "input_index": 1,
+      "class": "Finger snapping",
+      "preferred_instrument": "Side Stick",
+      "user_corrected": false,
+      "reason": "exact_instrument"
+    },
+    {
+      "kind": "drum",
+      "number": 43,
+      "file": "kick.wav",
+      "input_index": 6,
+      "class": "Bass drum",
+      "preferred_instrument": "Bass Drum 1",
+      "user_corrected": false,
+      "reason": "similar_role"
+    },
+    {
+      "kind": "drum",
+      "number": 45,
+      "file": "kick.wav",
+      "input_index": 6,
+      "class": "Bass drum",
+      "preferred_instrument": "Bass Drum 1",
+      "user_corrected": false,
+      "reason": "similar_role"
+    }
+  ],
+  "skipped_sounds": [],
+  "unused_sounds": [
+    {
+      "input_index": 0,
+      "file": "door_knock.wav"
+    },
+    {
+      "input_index": 2,
+      "file": "hand_clap.wav"
+    },
+    {
+      "input_index": 3,
+      "file": "switch_click.wav"
+    },
+    {
+      "input_index": 4,
+      "file": "glass_clink.wav"
+    },
+    {
+      "input_index": 5,
+      "file": "water_drop.wav"
+    },
+    {
+      "input_index": 7,
+      "file": "bass.wav"
+    }
+  ],
+  "unmapped": []
+}
