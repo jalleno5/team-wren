@@ -10,6 +10,7 @@
     "lint": "oxlint",
     "preview": "vite preview --host 127.0.0.1",
     "mock-api": "node mock-server/server.js",
+    "api": "node --env-file=.env.local server/server.js",
     "test": "vitest",
     "test:run": "vitest run"
   },

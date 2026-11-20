@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { supabase } from './lib/supabase';
 import type { SoundView } from './model';
 import { ServiceNotConfiguredError, setAccessTokenProvider } from './services';
 
@@ -28,10 +28,6 @@ const SOUNDS_KEY='encore-selected-sounds';
 const PENDING_BEAT_KEY='encore-pending-guest-beat';
 const GENERATED_BEAT_KEY='encore-generated-beat-id';
 const RETURN_TO_KEY='encore-post-login-return';
-const supabaseUrl=import.meta.env.VITE_SUPABASE_URL as string|undefined;
-const supabaseKey=import.meta.env.VITE_SUPABASE_ANON_KEY as string|undefined;
-const configured=Boolean(supabaseUrl&&supabaseKey&&!supabaseUrl.includes('your-project')&&!supabaseKey.includes('your-anon-key'));
-const supabase:SupabaseClient|null=configured?createClient(supabaseUrl!,supabaseKey!,{auth:{detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}}):null;
 
 function readSelected():SoundView[]{
   try{const value=JSON.parse(sessionStorage.getItem(SOUNDS_KEY)??'[]');return Array.isArray(value)?value.filter(item=>item&&typeof item.id==='string').slice(0,4):[];}catch{return [];}
