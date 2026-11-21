@@ -2,13 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { supabase } from '../lib/supabase'
 
 
+const redirectURL = `${window.location.origin}/auth/callback`
+
+
 const { signInWithOAuth, signOut } = vi.hoisted(() => ({
     signInWithOAuth: vi.fn(),
     signOut: vi.fn()
 }))
 
 
-vi.mock('@supabase/supabase-js', () => ({
+vi.mock("@supabase/supabase-js", () => ({
     createClient: vi.fn(() => ({
         auth: {
             signInWithOAuth,
@@ -18,11 +21,12 @@ vi.mock('@supabase/supabase-js', () => ({
 }))
 
 
-describe("Supabase Authentication Unit", () => {
+describe("Supabase Authentication Unit Tests", () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
     })
+
 
     it("should authenticate using Google", async () => {
         signInWithOAuth.mockResolvedValue({
@@ -36,20 +40,21 @@ describe("Supabase Authentication Unit", () => {
         await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`
+                redirectTo: redirectURL
             }
         })
 
         expect(signInWithOAuth).toHaveBeenCalledWith({
             provider: "google",
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`
+                redirectTo: redirectURL
             }
         })
     })
 
-    it('should handle Google OAuth errors', async () => {
-        const error = new Error('Google authentication failed')
+
+    it("should handle Google OAuth errors", async () => {
+        const error = new Error("Google authentication failed")
 
         signInWithOAuth.mockResolvedValue({
             data: {
@@ -62,21 +67,30 @@ describe("Supabase Authentication Unit", () => {
         const response = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
+                redirectTo: redirectURL,
             },
         })
-
         expect(response.error).toBe(error)
     })
 
-    it('should sign out successfully', async () => {
+
+    it("should sign out successfully", async () => {
         signOut.mockResolvedValue({
             error: null
         })
-
         const response = await supabase.auth.signOut()
-
         expect(response.error).toBeNull()
+        expect(signOut).toHaveBeenCalled()
+    })
+
+
+    it("should handle sign out errors", async () => {
+        const error = new Error("Sign out failed")
+        signOut.mockResolvedValue({
+            error
+        })
+        const response = await supabase.auth.signOut()
+        expect(response.error).toBe(error)
         expect(signOut).toHaveBeenCalled()
     })
         
