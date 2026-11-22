@@ -17,8 +17,61 @@ from pathlib import Path
 import mido
 import numpy as np
 import soundfile as sf
+from scipy.ndimage import uniform_filter1d
+from scipy.signal import butter, sosfilt
 
 SAMPLE_RATE = 44100
+TARGET_RMS_DBFS = -20.0
+MAX_BOOST_DB = 18.0
+SAMPLE_PEAK_CEILING = 0.9
+
+
+def active_rms(data):
+    """Measure active 20 ms frames so silence does not drive amplification."""
+    frame = max(1, round(.020 * SAMPLE_RATE))
+    energy = np.mean(np.square(data, dtype=np.float64), axis=1)
+    sums = np.add.reduceat(energy, np.arange(0, len(energy), frame))
+    lengths = np.minimum(frame, len(energy) - np.arange(0, len(energy), frame))
+    levels = np.sqrt(sums / lengths)
+    active = levels >= max(float(levels.max()) * .01, 1e-5)
+    if not active.any():
+        return 0.0
+    return float(np.sqrt(sums[active].sum() / lengths[active].sum()))
+
+
+def prepare_sample(data):
+    """Balance and soften a decoded sample before pitch/duration and MIDI velocity.
+
+    Preserve timing, stereo balance and the source file. Active-frame RMS is a
+    practical short-sample level estimate, not an integrated LUFS measurement.
+    """
+    data = np.asarray(data, dtype=np.float32).copy()
+    if data.ndim != 2 or not len(data) or not np.isfinite(data).all():
+        raise ValueError("Sample must contain finite, nonempty audio frames")
+    # Remove DC/subsonic rumble without changing sample length or alignment.
+    data = sosfilt(butter(2, 30, btype="highpass", fs=SAMPLE_RATE, output="sos"), data, axis=0)
+    level = active_rms(data)
+    if level < 1e-5:
+        return np.zeros_like(data, dtype=np.float32)
+    # A linked stereo RMS envelope gently compresses peaks (3:1) above the
+    # sample's active level. Smooth the gain to avoid abrupt level changes.
+    envelope = np.sqrt(np.maximum(uniform_filter1d(np.mean(data * data, axis=1),
+                       size=max(1, round(.005 * SAMPLE_RATE)), mode="nearest"), 0))
+    threshold = level * 1.5
+    ratio = np.maximum(envelope / threshold, 1.0)
+    gain = uniform_filter1d(ratio ** (-2 / 3), size=max(1, round(.010 * SAMPLE_RATE)), mode="nearest")
+    data *= gain[:, None]
+    attack = min(round(.002 * SAMPLE_RATE), len(data) // 2)
+    release = min(round(.008 * SAMPLE_RATE), len(data) // 2)
+    if attack:
+        data[:attack] *= np.linspace(0, 1, attack)[:, None]
+    if release:
+        data[-release:] *= np.linspace(1, 0, release)[:, None]
+    level = active_rms(data)
+    if level > 0:
+        boost = min(10 ** (TARGET_RMS_DBFS / 20) / level, 10 ** (MAX_BOOST_DB / 20))
+        data *= min(boost, SAMPLE_PEAK_CEILING / max(float(np.abs(data).max()), 1e-12))
+    return data.astype(np.float32)
 
 
 def resolve_path(value, base):
@@ -28,6 +81,11 @@ def resolve_path(value, base):
 
 def read_mapping(path, sounds_dir):
     raw = json.loads(path.read_text(encoding="utf-8"))
+    return parse_mapping(raw, sounds_dir)
+
+
+def parse_mapping(raw, sounds_dir):
+    """Accept the same JSON-compatible dictionary used by the CLI."""
     instruments = {}
     drums = {}
     for key, entry in raw.get("programs", {}).items():
@@ -41,6 +99,8 @@ def read_mapping(path, sounds_dir):
             "root_note": int(entry.get("root_note", 60)),
             "loop": bool(entry.get("loop", True)),
         }
+        if not 0 <= instruments[program]["root_note"] <= 127:
+            raise ValueError("root_note must be between 0 and 127")
     for key, entry in raw.get("drums", {}).items():
         note = int(key)
         if not 0 <= note <= 127:
@@ -54,6 +114,22 @@ def read_mapping(path, sounds_dir):
         if not item["file"].is_file():
             raise FileNotFoundError(f"Audio sample not found: {item['file']}")
     return instruments, drums
+
+
+def apply_sounds(midi_path, mapping, output_path, *, sounds_dir=None):
+    """Render a MIDI with a mapping dictionary or JSON path; return render metadata.
+
+    Relative sample paths resolve against sounds_dir, or the JSON file's folder.
+    """
+    if isinstance(mapping, (str, Path)):
+        mapping_path = Path(mapping).resolve()
+        raw = json.loads(mapping_path.read_text(encoding="utf-8"))
+        base = Path(sounds_dir) if sounds_dir is not None else mapping_path.parent
+    else:
+        raw = mapping
+        base = Path(sounds_dir) if sounds_dir is not None else Path.cwd()
+    programs, drums = parse_mapping(raw, base)
+    return render_file(Path(midi_path), Path(output_path), programs, drums, {})
 
 
 def load_sample(path, cache):
@@ -85,7 +161,8 @@ def load_sample(path, cache):
             positions = np.arange(max(1, round(len(data) * SAMPLE_RATE / rate))) * rate / SAMPLE_RATE
             positions = np.minimum(positions, len(data) - 1)
             data = interpolate_stereo(data, positions)
-        cache[path] = data
+        # Prepare once per source sample. synth_note applies velocity afterward.
+        cache[path] = prepare_sample(data)
     return cache[path]
 
 
@@ -166,8 +243,7 @@ def render_file(midi_path, output_path, programs, drums, cache):
                           duration, config.get("loop", False), is_drum)
         scheduled.append((round(start * SAMPLE_RATE), clip))
     if not scheduled:
-        print(f"SKIPPED {midi_path.name}: no notes match the mapping")
-        return
+        raise ValueError(f"No notes in {midi_path.name} match the mapping")
     n_frames = max(begin + len(clip) for begin, clip in scheduled) + round(0.25 * SAMPLE_RATE)
     output = np.zeros((n_frames, 2), dtype=np.float32)
     for begin, clip in scheduled:
@@ -182,6 +258,10 @@ def render_file(midi_path, output_path, programs, drums, cache):
         print(f"  Unmapped programs (0-based): {sorted(missing_programs)}")
     if missing_drums:
         print(f"  Unmapped drum notes: {sorted(missing_drums)}")
+    return {"path": str(output_path), "rendered_notes": len(scheduled),
+            "sample_preparation": {"target_active_rms_dbfs": TARGET_RMS_DBFS,
+                                   "max_boost_db": MAX_BOOST_DB, "peak_ceiling": SAMPLE_PEAK_CEILING},
+            "unmapped_programs": sorted(missing_programs), "unmapped_drums": sorted(missing_drums)}
 
 
 def main():
@@ -190,7 +270,7 @@ def main():
     parser.add_argument("midi_file", help="Path to exactly one .mid or .midi file (required)")
     parser.add_argument("--mapping", default="sound_map.json")
     parser.add_argument("--sounds", default="../Sounds")
-    parser.add_argument("--output-dir", default="../Songs/Fermata_Songs")
+    parser.add_argument("--output-dir", default="../outputs/rendered")
     parser.add_argument("--output", help="Optional output WAV filename/path; defaults to <MIDI stem>.wav in --output-dir")
     args = parser.parse_args()
 

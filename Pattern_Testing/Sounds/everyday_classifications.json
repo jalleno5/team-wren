@@ -1,0 +1,12 @@
+[
+  {"file": "door_knock.wav", "yamnet_class": "Knock"},
+  {"file": "finger_snap.wav", "yamnet_class": "Finger snapping"},
+  {"file": "hand_clap.wav", "yamnet_class": "Clapping"},
+  {"file": "key_jingle.wav", "yamnet_class": "Keys jangling"},
+  {"file": "coin_drop.wav", "yamnet_class": "Coin (dropping)"},
+  {"file": "glass_clink.wav", "yamnet_class": "Chink, clink", "root_note": 84},
+  {"file": "water_drop.wav", "yamnet_class": "Drip"},
+  {"file": "paper_crumple.wav", "yamnet_class": "Crumpling, crinkling"},
+  {"file": "zipper_pull.wav", "yamnet_class": "Zipper (clothing)"},
+  {"file": "switch_click.wav", "yamnet_class": "Clicking"}
+]

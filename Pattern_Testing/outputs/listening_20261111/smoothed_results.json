@@ -1,0 +1,98 @@
+{
+  "trap": {
+    "everyday": {
+      "path": "listening_20261111/trap/everyday_smoothed.wav",
+      "rendered_notes": 16,
+      "sample_preparation": {
+        "target_active_rms_dbfs": -20.0,
+        "max_boost_db": 18.0,
+        "peak_ceiling": 0.9
+      },
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "mixed": {
+      "path": "listening_20261111/trap/mixed_smoothed.wav",
+      "rendered_notes": 16,
+      "sample_preparation": {
+        "target_active_rms_dbfs": -20.0,
+        "max_boost_db": 18.0,
+        "peak_ceiling": 0.9
+      },
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    }
+  },
+  "country": {
+    "everyday": {
+      "path": "listening_20261111/country/everyday_smoothed.wav",
+      "rendered_notes": 355,
+      "sample_preparation": {
+        "target_active_rms_dbfs": -20.0,
+        "max_boost_db": 18.0,
+        "peak_ceiling": 0.9
+      },
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "mixed": {
+      "path": "listening_20261111/country/mixed_smoothed.wav",
+      "rendered_notes": 355,
+      "sample_preparation": {
+        "target_active_rms_dbfs": -20.0,
+        "max_boost_db": 18.0,
+        "peak_ceiling": 0.9
+      },
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    }
+  },
+  "pop": {
+    "everyday": {
+      "path": "listening_20261111/pop/everyday_smoothed.wav",
+      "rendered_notes": 100,
+      "sample_preparation": {
+        "target_active_rms_dbfs": -20.0,
+        "max_boost_db": 18.0,
+        "peak_ceiling": 0.9
+      },
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "mixed": {
+      "path": "listening_20261111/pop/mixed_smoothed.wav",
+      "rendered_notes": 100,
+      "sample_preparation": {
+        "target_active_rms_dbfs": -20.0,
+        "max_boost_db": 18.0,
+        "peak_ceiling": 0.9
+      },
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    }
+  },
+  "choir": {
+    "everyday": {
+      "path": "listening_20261111/choir/everyday_smoothed.wav",
+      "rendered_notes": 34,
+      "sample_preparation": {
+        "target_active_rms_dbfs": -20.0,
+        "max_boost_db": 18.0,
+        "peak_ceiling": 0.9
+      },
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    },
+    "mixed": {
+      "path": "listening_20261111/choir/mixed_smoothed.wav",
+      "rendered_notes": 34,
+      "sample_preparation": {
+        "target_active_rms_dbfs": -20.0,
+        "max_boost_db": 18.0,
+        "peak_ceiling": 0.9
+      },
+      "unmapped_programs": [],
+      "unmapped_drums": []
+    }
+  }
+}

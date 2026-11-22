@@ -1,0 +1,48 @@
+{
+  "bpm": 110,
+  "seed": 243,
+  "prompt": "Minimal house groove at 110 BPM with a clear glockenspiel melody, deep fingered electric bass, steady bass drum, woodblock percussion and hand claps. Clean dry sound, sparse arrangement.",
+  "duration_requested": 16,
+  "model": "facebook/musicgen-small",
+  "midi": {
+    "notes": 8,
+    "programs": [],
+    "drums": [
+      37,
+      43,
+      45
+    ]
+  },
+  "everyday": {
+    "path": "listening_focused_20261111/minimal_house_110/everyday.wav",
+    "rendered_notes": 8,
+    "sample_preparation": {
+      "target_active_rms_dbfs": -20.0,
+      "max_boost_db": 18.0,
+      "peak_ceiling": 0.9
+    },
+    "unmapped_programs": [],
+    "unmapped_drums": [],
+    "sample_note_counts": {
+      "door_knock.wav": 4,
+      "finger_snap.wav": 4
+    }
+  },
+  "mixed": {
+    "path": "listening_focused_20261111/minimal_house_110/mixed.wav",
+    "rendered_notes": 8,
+    "sample_preparation": {
+      "target_active_rms_dbfs": -20.0,
+      "max_boost_db": 18.0,
+      "peak_ceiling": 0.9
+    },
+    "unmapped_programs": [],
+    "unmapped_drums": [],
+    "sample_note_counts": {
+      "kick.wav": 4,
+      "finger_snap.wav": 4
+    }
+  },
+  "status": "completed",
+  "elapsed_seconds": 65.33
+}

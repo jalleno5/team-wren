@@ -5,7 +5,7 @@ Usage:
     python new_sound_map.py "../MIDI_sequences/example.mid" --output custom_map.json
 
 Relative input/output paths are resolved relative to this script's directory.
-Requires: mido (included in the renderer's requirements.txt).
+Requires: mido (included in ../requirements.txt).
 """
 
 import argparse
