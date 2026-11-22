@@ -3,6 +3,7 @@ import { CURRENT_USER_ID, createData } from './data.js'
 const MIN_SPEED = 60
 const MAX_SPEED = 200
 const MAX_SOUNDS_PER_BEAT = 4
+const SOUND_CATEGORIES = ['percussion', 'rhythmic', 'melodic', 'ambient', 'transition']
 
 const reply = (status, body) => ({ status, body })
 const error = (status, message) => reply(status, { error: message })
@@ -99,14 +100,14 @@ export function createMockApi(data = createData()) {
 
     // Classification
 
-    // Returns YAMNet's top 3 guesses for a sound. The same sound always gets the same result.
+    // Returns one generation category. The same sound always gets the same result.
     'POST /api/classify': ({ body }) => {
       const sound = findSound(body.sound_id)
       if (!sound || !canSeeSound(sound)) return error(404, 'Sound not found')
 
       const pick = [...sound.id].reduce((sum, char) => sum + char.charCodeAt(0), 0)
-      const labels = data.classifications[pick % data.classifications.length]
-      return reply(200, { sound_id: sound.id, labels })
+      const category = data.classifications[pick % data.classifications.length]
+      return reply(200, { sound_id: sound.id, category })
     },
 
     // Beats
@@ -116,13 +117,18 @@ export function createMockApi(data = createData()) {
     // Like the real generation worker, this answers right away with a "queued" job.
     // Ask for the beat with GET /api/beats/:id to get the finished result.
     'POST /api/beats': ({ body }) => {
-      const { title, speed, genre = null, sound_ids: soundIds } = body
+      const { title, speed, genre = null, sounds } = body
 
-      if (!Array.isArray(soundIds) || soundIds.length === 0) {
+      if (!Array.isArray(sounds) || sounds.length === 0) {
         return error(400, 'Pick at least one sound')
       }
-      if (soundIds.length > MAX_SOUNDS_PER_BEAT) {
+      if (sounds.length > MAX_SOUNDS_PER_BEAT) {
         return error(400, `A beat can use at most ${MAX_SOUNDS_PER_BEAT} sounds`)
+      }
+      const soundIds = sounds.map((sound) => sound?.sound_id)
+      if (new Set(soundIds).size !== soundIds.length) return error(400, 'Each sound can only be used once per beat')
+      if (sounds.some((sound) => !SOUND_CATEGORIES.includes(sound?.category))) {
+        return error(400, `Each sound needs a category: ${SOUND_CATEGORIES.join(', ')}`)
       }
       if (soundIds.some((id) => !findSound(id) || !canSeeSound(findSound(id)))) {
         return error(400, 'One or more sounds could not be found')
@@ -138,7 +144,7 @@ export function createMockApi(data = createData()) {
         speed,
         genre,
         visibility: 'private',
-        sound_ids: soundIds,
+        sounds: sounds.map((sound) => ({ sound_id: sound.sound_id, category: sound.category })),
         status: 'queued',
         audio_url: null,
       }

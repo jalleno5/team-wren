@@ -1,4 +1,4 @@
-import type { SoundView } from './model';
+import { isSoundCategory, type SoundCategory, type SoundView } from './model';
 
 export class ServiceNotConfiguredError extends Error {
   readonly code='SERVICE_NOT_CONFIGURED';
@@ -20,6 +20,7 @@ export interface BeatOutput { id:string; name:string; status:BeatStatus; audioUr
 export interface ProfileRecord { id:string; username:string; email:string; photoUrl?:string }
 export interface SoundPlayback { url:string; trimStartSeconds:number; trimEndSeconds?:number }
 export interface SoundReport { id:string; soundId:string; description:string|null; createdAt:string }
+export interface CategorizedSound { soundId:string; category:SoundCategory }
 
 export interface SoundService {
   list(input:{scope:'mine'|'public';query?:string;signal?:AbortSignal}):Promise<SoundView[]>;
@@ -28,9 +29,10 @@ export interface SoundService {
   delete(soundId:string):Promise<void>;
   setVisibility(soundId:string,visibility:SoundView['visibility']):Promise<SoundView>;
   flag(soundId:string,reason:string):Promise<SoundReport>;
+  classify(soundId:string):Promise<SoundCategory>;
 }
 export interface BeatService {
-  generate(input:{soundIds:string[];parameters:BeatParameters;guest:boolean;title?:string}):Promise<BeatJobReference>;
+  generate(input:{sounds:CategorizedSound[];parameters:BeatParameters;guest:boolean;title?:string}):Promise<BeatJobReference>;
   getOutput(beatId:string,input?:{guestToken?:string;signal?:AbortSignal}):Promise<BeatOutput>;
   claim(beatId:string,guestToken:string):Promise<BeatOutput>;
   getDownloadUrl(beatId:string):Promise<string>;
@@ -122,11 +124,12 @@ export const soundService:SoundService={
   async delete(soundId){await apiRequest<void>(`/sounds/${encodeURIComponent(soundId)}`,{method:'DELETE'});},
   async setVisibility(soundId,visibility){return toSound(await apiRequest<SoundDto>(`/sounds/${encodeURIComponent(soundId)}`,{method:'PATCH',body:JSON.stringify({visibility})}),'mine');},
   async flag(soundId,reason){const row=await apiRequest<ReportDto>(`/sounds/${encodeURIComponent(soundId)}/reports`,{method:'POST',body:JSON.stringify({description:reason})});return {id:row.id,soundId:row.sound_id,description:row.description??null,createdAt:row.created_at};},
+  async classify(soundId){const row=await apiRequest<{sound_id:string;category:unknown}>('/classify',{method:'POST',body:JSON.stringify({sound_id:soundId})});if(row.sound_id!==soundId||!isSoundCategory(row.category))throw new ApiError(502,'The classifier returned an invalid sound category.','/classify');return row.category;},
 };
 
 export const beatService:BeatService={
-  async generate({soundIds,parameters,guest,title}){
-    const row=await apiRequest<{id:string;status:BeatStatus;guest_token?:string}>('/beats',{method:'POST',body:JSON.stringify({title,speed:parameters.tempo,genre:parameters.genre,sound_ids:soundIds})});
+  async generate({sounds,parameters,guest,title}){
+    const row=await apiRequest<{id:string;status:BeatStatus;guest_token?:string}>('/beats',{method:'POST',body:JSON.stringify({title,speed:parameters.tempo,genre:parameters.genre,sounds:sounds.map(sound=>({sound_id:sound.soundId,category:sound.category}))})});
     if(guest&&!row.guest_token)throw new BackendCapabilityError('Guest generation credentials');
     return {id:row.id,status:row.status,guestToken:row.guest_token};
   },
