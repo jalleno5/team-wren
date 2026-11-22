@@ -12,7 +12,8 @@
     "mock-api": "node mock-server/server.js",
     "api": "node --env-file=.env.local server/server.js",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:server": "node server/tests/beat-worker.node.js"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

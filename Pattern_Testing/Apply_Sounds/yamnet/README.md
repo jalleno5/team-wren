@@ -98,21 +98,28 @@ apply_sounds("outputs/local/transcribed.mid", report["mapping"], "outputs/classi
 
 ## Worker API
 
+The HTTP API now assigns sounds using `public.sounds.classification` and the
+instruments actually present in a source MIDI. This YAMNet table is retained
+for local CLI examples and the class catalog; it does not control automatic
+API assignments. See [database role assignment](../../README.md#automatic-assignment-from-database-roles).
+
 All requests use the existing worker bearer authentication.
 
 - `GET /music/yamnet/classes` returns the complete editable class/instrument
   catalog for a class-selection UI.
 - `POST /music/mappings` accepts `{"sounds": [...], "source_job_id": "...",
   "fallback": "nearest"}` and returns the mapping plus its assignment report.
-  Omit `source_job_id` to emit only preferred targets before a MIDI exists.
+  `source_job_id` is required; each sound needs only `file` with its sound UUID.
 - Pass the returned `mapping` to `POST /music/renders` with the same
-  `source_job_id` to render the MIDI with those sounds. A preferred-target
-  mapping can also be passed to `POST /music/jobs`, but may not cover instruments
-  discovered later; generate a MIDI-aware mapping after transcription for coverage.
+  `source_job_id` to render the MIDI with those sounds. Alternatively pass
+  `sounds` directly to `/music/jobs` or `/music/renders` for automatic assignment.
 
-Samples must already exist in `MUSIC_SOUNDS_DIR`. The mapping endpoint validates
-sample paths and availability, and does not upload audio. Your Vercel route must
-check ownership of the source job before forwarding this request.
+For HTTP requests, `file` contains a sound UUID from `public.sounds`, and
+`X-Supabase-Authorization: Bearer <user access token>` supplies the caller's
+Supabase session. The worker downloads audio using each row's visibility and
+storage path. See [API sample setup](../../README.md#supabase-samples-in-api-requests).
+Local CLI inputs still use filenames. Your Vercel route must check ownership
+of the source job before forwarding a request.
 
 ## Maintaining the table
 

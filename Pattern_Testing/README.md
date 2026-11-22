@@ -71,15 +71,15 @@ Set environment variables in your shell/host; `.env.example` is not auto-loaded.
 
 | Endpoint | Purpose |
 | --- | --- |
-| `POST /music/jobs` | Generate audio and transcribe MIDI. Body: `prompt`, optional `duration` (default 10) and `mapping`. Returns a job ID. |
+| `POST /music/jobs` | Generate audio and transcribe MIDI. Body: `prompt`, optional `duration` (default 10), and optional `mapping` or `sounds` for rendering. Returns a job ID. |
 | `POST /music/percussion-jobs` | Optional HDemucs drum replacement mixed with original accompaniment. Accepts a prompt or source job, plus a drum mapping or classified sounds. |
 | `GET /music/jobs/{id}` | Poll progress, results and download links. |
 | `GET /music/jobs/{id}/artifacts/audio` | Download the original generated WAV. |
 | `GET /music/jobs/{id}/artifacts/midi` | Download the transcribed MIDI. |
 | `GET /music/jobs/{id}/artifacts/rendered` | Download the sample-rendered WAV, if available. |
 | `GET /music/yamnet/classes` | List all 521 YAMNet classes and their instrument assignments. |
-| `POST /music/mappings` | Build a sound mapping. Body: `sounds`, optional `source_job_id` and `fallback` (`nearest` or `omit`). |
-| `POST /music/renders` | Render an existing job's MIDI. Body: `source_job_id` and `mapping`. Returns a new job ID. |
+| `POST /music/mappings` | Assign database-classified sounds to MIDI instruments. Body: `sounds`, required `source_job_id`, optional `fallback` (`nearest` or `omit`). |
+| `POST /music/renders` | Render an existing job's MIDI. Body: `source_job_id` and either `mapping` or `sounds`. Returns a new job ID. |
 
 For **replace percussion, keep the rest of the song**, see
 [the optional percussion pipeline](PERCUSSION.md) for requests, local commands
@@ -89,7 +89,115 @@ Typical flow: create job -> poll until `completed` -> build a mapping with
 its `source_job_id` -> submit that mapping to `/music/renders` -> poll and download.
 Jobs return 202; a full queue returns 429. Failed jobs include an error.
 A completed generation may include `render_error` while its original WAV and
-MIDI remain available. Samples must already exist in the worker's sound library.
+MIDI remain available. API samples come from Supabase; see below.
+
+### Supabase samples in API requests
+
+Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` on the worker (the existing
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are accepted as fallbacks).
+Use the publishable/anon key, not a service-role key. For requests containing
+samples, forward the signed-in user's access token in a second header:
+
+```text
+Authorization: Bearer <MUSIC_API_KEY>
+X-Supabase-Authorization: Bearer <user Supabase access token>
+```
+
+The `file` field now contains a canonical **sound UUID from `public.sounds`**,
+not a local filename, storage path, or URL. For example, `/music/mappings` takes:
+
+```json
+{
+  "source_job_id": "<completed-generation-job-uuid>",
+  "sounds": [{"file": "11111111-1111-4111-8111-111111111111"}]
+}
+```
+
+Mappings returned by this endpoint retain those UUIDs in their `file` fields.
+Pass them unchanged to `/music/renders` or `/music/jobs`, forwarding the user
+token again. `/music/percussion-jobs` supports the same UUIDs in `sounds` or
+`mapping`. In a manual mapping, a string value is also a sound UUID:
+`{"drums": {"36": "11111111-1111-4111-8111-111111111111"}}`.
+
+The worker looks up each sound's `visibility` and `storage_path` under the
+user's RLS permissions, then downloads from `sounds-private` or `sounds-public`.
+Samples are staged before queuing so the queued job does not retain a user
+token. Temporary files are isolated per request and removed on completion or
+failure. Missing/inaccessible sounds fail before a job is accepted; downloads
+are limited to 10 MB per sample. Requests without samples need only the worker
+key. Compressed recordings such as WebM require FFmpeg on the worker's PATH.
+
+The Node background worker uses `integration/worker-client.js` to submit jobs
+and retrieve results. It sends `job_id` equal to the beat UUID for idempotent
+retries and `sample_sources` containing short-lived Supabase signed URLs and
+persisted per-beat classifications. This trusted server path requires the
+worker key and does not require a user JWT. Direct user-scoped worker requests
+can continue using `X-Supabase-Authorization` as described above. See
+[application setup](../docs/integration.md#real-generation-after-the-background-worker-merge).
+
+Local CLI commands still accept sample filenames and `--sounds`; only the
+HTTP API uses Supabase IDs.
+
+### Automatic assignment from database roles
+
+The worker reads `sounds.classification` from Supabase: `Percussion`, `Rhythmic`,
+`Melodic`, `Ambient`, or `Transition`. Request-supplied classifications,
+`yamnet_class`, and `user_class` do not override this database role. Sounds
+without a valid classification are rejected before an automatic job is queued.
+Explicit manual mappings can still use unclassified sounds.
+
+The trusted Node background service additionally supports a `sample_sources`
+manifest: these roles come from persisted `sounds_beats.category`, falling back
+to the sound's global classification. This preserves the merged frontend's
+per-beat role choices. Only the backend holding `MUSIC_API_KEY` may submit
+these scoped, signed sample URLs.
+
+To generate and automatically render in one job, send `POST /music/jobs`:
+
+```json
+{
+  "prompt": "A relaxed house beat",
+  "duration": 10,
+  "sounds": [
+    {"file": "11111111-1111-4111-8111-111111111111"},
+    {"file": "22222222-2222-4222-8222-222222222222"}
+  ]
+}
+```
+
+Assignment runs after transcription and uses only instruments with playable
+notes. `Apply_Sounds/role_mapping.py` contains the editable compatibility policy:
+
+| MIDI instrument | Preferred role | Compatible fallback |
+| --- | --- | --- |
+| Most drum pitches | Percussion | Rhythmic |
+| Hats, shakers, scrapes | Rhythmic | Percussion |
+| Crash/effect cymbals | Transition | Percussion |
+| Pitched programs, including bass, keys, strings, leads | Melodic | None |
+| Synth pads (programs 88–95) | Ambient | None |
+| Synth effects (96–103) | Ambient | Transition |
+| Percussive programs (112–119) | Percussion | Rhythmic, Melodic |
+| Sound effects (120–127) | Transition | None |
+
+Programs are zero-based. Within the best matching role, the mapper distributes
+instruments across samples in request order and reuses samples if necessary.
+Instruments without a compatible sound are omitted and reported; surplus
+samples are reported as unused. It does not invent instruments or alter MIDI
+timing. A transition sample follows its assigned MIDI notes; phrase-boundary
+scheduling is not added by this mapper.
+
+`mapping_report` contains assignments, reuse flags, unused samples and unmapped
+instruments. Generation retains its original WAV and MIDI with `render_error`
+if no compatible mapping can be rendered. For an existing MIDI, use
+`/music/mappings` to inspect the report before rendering, or pass `sounds`
+directly to `/music/renders` to assign and render in one job. Supply `mapping`
+or `sounds`, not both. `fallback=omit` on `/music/mappings` restricts assignment
+to preferred roles; `nearest` also permits the compatible roles in the table.
+
+Optional `root_note` and `loop` are playback controls, not classification
+overrides. Root note defaults to MIDI 60; pitch detection is not performed.
+Ambient samples loop by default; other roles play without looping.
+The local YAMNet CLI mapper remains available for the bundled demonstrations.
 
 For deployment, Vercel forwards authenticated requests to this separate Python
 worker; Supabase stores finished files. Keep the worker key server-side and

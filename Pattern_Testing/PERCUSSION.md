@@ -31,16 +31,15 @@ Generate a new song and replace its percussion:
 ```
 
 Or reuse a completed/failed job whose original audio is available, avoiding
-another MusicGen run. Supply trusted classifications to build a MIDI-aware
-mapping automatically:
+another MusicGen run. Supply sound IDs to build a MIDI-aware mapping from their
+database classification roles automatically:
 
 ```json
 {
   "source_job_id": "original-job-uuid",
   "sounds": [
-    {"file": "door_knock.wav", "yamnet_class": "Knock"},
-    {"file": "hand_clap.wav", "yamnet_class": "Clapping"},
-    {"file": "finger_snap.wav", "yamnet_class": "Finger snapping"}
+    {"file": "11111111-1111-4111-8111-111111111111"},
+    {"file": "22222222-2222-4222-8222-222222222222"}
   ]
 }
 ```
@@ -48,9 +47,15 @@ mapping automatically:
 Supply exactly one of `prompt` or `source_job_id`, and exactly one of `mapping`
 or `sounds`. Explicit mappings use drum pitches only; `programs` must be empty
 or omitted. Unmapped drum notes in a manual mapping are reported and skipped.
-The automatic mapping covers the transcribed drum pitches, reusing samples if
-necessary. User-corrected classes are accepted as in the standard mapping path.
-All sample files must already exist inside `MUSIC_SOUNDS_DIR`.
+The automatic mapping assigns compatible database roles to transcribed drum
+pitches, reusing samples if necessary. Incompatible sounds remain unused and
+unmatched drum pitches are omitted. The final job fails if no compatible
+assignments exist. Request-supplied classifications do not override database roles.
+For HTTP requests, replace each example filename above with its sound UUID
+from `public.sounds` and send `X-Supabase-Authorization: Bearer <user access token>`
+alongside the worker key. The worker fetches the samples from Supabase using
+the user's permissions; see [API sample setup](README.md#supabase-samples-in-api-requests).
+Local CLI examples continue to use filenames and `--sounds`.
 
 Poll `GET /music/jobs/{id}`. The stages are `generating` (or `copying_audio`),
 `separating`, `transcribing_drums`, `rendering_percussion`, `mixing`, then

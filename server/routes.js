@@ -60,7 +60,7 @@ function failIf(error) {
 
 // "creator:users ( username )" = also fetch the owner's username from the users table
 // and name it "creator". Supabase can do this because sounds.user_id points at users.id
-const SOUND_COLUMNS = 'id, user_id, title, visibility, storage_path, created_at, creator:users ( username )'
+const SOUND_COLUMNS = 'id, user_id, title, visibility, storage_path, classification, created_at, creator:users ( username )'
 
 // shapes a database row the way the frontend expects (see SoundDto in src/services.ts)
 // storage_path is left out on purpose: the browser gets files through signed links instead
@@ -162,6 +162,14 @@ async function linkSounds(client, beatId, sounds) {
   }
 }
 
+async function enqueueBeat(beatId, prompt, duration) {
+  const { error } = await admin.from('beat_worker_jobs').insert({ beat_id: beatId, prompt: prompt || null, duration })
+  if (error) {
+    await admin.from('beats').update({ status: 'failed', error_message: 'Could not queue generation. Please try again.' }).eq('id', beatId)
+    failIf(error)
+  }
+}
+
 // the frontend sends the storage_path from POST /api/uploads, we save the public link to that photo
 // null removes the photo
 function avatarUrlFrom(value, db, user) {
@@ -173,6 +181,27 @@ function avatarUrlFrom(value, db, user) {
 // ROUTES ("METHOD /path": async function)
 const routes = {
   'GET /api/health': async () => reply(200, { status: 'ok' }),
+
+  'POST /api/classify': async ({ body, db }) => {
+    const sound = await findSound(db, body.sound_id)
+    const saved = sound.classification?.toLowerCase()
+    if (SOUND_CATEGORIES.includes(saved)) return reply(200, { sound_id: sound.id, category: saved })
+    if (!process.env.CLASSIFY_WORKER_URL) throw new HttpError(503, 'Sound classification is not configured')
+    const signed = await db.storage.from(BUCKETS[sound.visibility]).createSignedUrl(sound.storage_path, 120)
+    failIf(signed.error)
+    let result
+    try {
+      const response = await fetch(`${process.env.CLASSIFY_WORKER_URL.replace(/\/$/, '')}/classify-url`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audio_url: signed.data.signedUrl }), signal: AbortSignal.timeout(60_000),
+      })
+      if (!response.ok) throw new Error('Classifier failed')
+      result = await response.json()
+    } catch { throw new HttpError(503, 'Sound classification is temporarily unavailable') }
+    const category = result.role_suggestions?.[0]?.role_id
+    if (result.status !== 'ok' || !SOUND_CATEGORIES.includes(category)) throw new HttpError(422, 'This recording could not be classified. Try another sound.')
+    return reply(200, { sound_id: sound.id, category })
+  },
 
   // profile
 
@@ -380,7 +409,12 @@ const routes = {
 
   // members and guests can both make beats, guests get a guest_token back to poll and later claim it
   'POST /api/beats': async ({ body, db, user, ip }) => {
-    const sounds = body.sounds
+    let sounds = body.sounds
+    if (!sounds && Array.isArray(body.sound_ids)) {
+      const result = await db.from('sounds').select('id,classification').in('id', body.sound_ids)
+      failIf(result.error)
+      sounds = body.sound_ids.map(id => ({ sound_id: id, category: result.data.find(s => s.id === id)?.classification?.toLowerCase() }))
+    }
     if (!Array.isArray(sounds) || sounds.length === 0) throw new HttpError(400, 'Pick at least one sound')
     if (sounds.length > MAX_SOUNDS_PER_BEAT) {
       throw new HttpError(400, `A beat can use at most ${MAX_SOUNDS_PER_BEAT} sounds`)
@@ -396,6 +430,11 @@ const routes = {
       throw new HttpError(400, `speed must be a whole number from ${MIN_SPEED} to ${MAX_SPEED}`)
     }
     const genre = body.genre == null ? null : String(body.genre)
+    if (genre && genre.length > 100) throw new HttpError(400, 'genre is too long')
+    if (body.prompt != null && (typeof body.prompt !== 'string' || body.prompt.length > 1600)) throw new HttpError(400, 'prompt must be text up to 1600 characters')
+    const duration = body.duration ?? 10
+    if (!Number.isFinite(duration) || duration < 1 || duration > 30) throw new HttpError(400, 'duration must be between 1 and 30 seconds')
+    if (!process.env.MUSIC_WORKER_URL || !process.env.MUSIC_API_KEY) throw new HttpError(503, 'Music generation is not configured')
 
     // members can use their own or public sounds (rls), guests only public ones
     let soundQuery = db.from('sounds').select('id').in('id', soundIds)
@@ -414,6 +453,7 @@ const routes = {
         .from('beats').insert({ user_id: user.id, ...fields }).select('id, status').single()
       failIf(error)
       await linkSounds(db, beat.id, sounds)
+      await enqueueBeat(beat.id, body.prompt, duration)
       // 202 = "accepted, still working on it"
       return reply(202, { id: beat.id, status: beat.status })
     }
@@ -442,6 +482,7 @@ const routes = {
       .single()
     failIf(error)
     await linkSounds(admin, beat.id, sounds)
+    await enqueueBeat(beat.id, body.prompt, duration)
     return reply(202, { id: beat.id, status: beat.status, guest_token: guestToken })
   },
 

@@ -35,7 +35,7 @@ Moving from Sounds to Parameters classifies each selected sample into a beat-spe
 
 ## Not implemented
 
-The API in `server/` provides profiles, signed sound uploads, sound playback links, reports, and beat creation/polling. It still lacks a generation worker (new beats stay `queued`), served beat audio, guest credentials/limits, beat claiming, and authenticated direct-download URLs. The frontend calls the documented future contracts and reports `BackendCapabilityError` when a route is absent; it never returns mock success for those operations.
+The API in `server/` provides sound uploads, classification forwarding, profiles, guest/member beats, claims and signed playback/downloads. A background worker submits real generation to the Python music service and stores the rendered WAV in the private `beats` bucket. Configure the services and apply the generation migration before running; see [integration setup](docs/integration.md#real-generation-after-the-background-worker-merge).
 
 Workflow state is session-scoped and no IndexedDB or durable browser database is used. Prior browser-local records from earlier iterations are not read, modified, or cleared.
 
@@ -46,6 +46,9 @@ Workflow state is session-scoped and no IndexedDB or durable browser database is
 ## Testing policy
 
 Tests use Vitest and live in `src/__tests__/`; they are written by hand by the team. Run them with `npm test` (watch mode) or `npm run test:run` (once). CI only installs dependencies and builds the app.
+
+Run `npm run test:server` for the beat route and worker orchestration tests.
+These use Node's test runner with mocked Supabase and worker calls.
 
 ## Team contribution rules
 

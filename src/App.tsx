@@ -3,7 +3,7 @@ import { Link, NavLink, Navigate, Outlet, Route, Routes, useLocation, useNavigat
 import { ArrowDownToLine, ArrowLeft, ArrowRight, AudioLines, Beaker, Check, Flag, Globe2, Info, LockKeyhole, LogOut, Mic, Pause, Play, Plus, RotateCcw, Search, Settings2, Trash2, Upload, X } from 'lucide-react';
 import { MIN_TEMPO, MAX_TEMPO, genres, soundCategories as categoryOptions, type SoundCategory, type SoundView } from './model';
 import { outputPreview, sounds } from './fixtures';
-import { beatService, profileService, serviceErrorMessage, soundService, type BeatOutput } from './services';
+import { ApiError, beatService, profileService, serviceErrorMessage, soundService, type BeatOutput } from './services';
 import { useSession } from './session';
 import { clipAudioBlob } from './audio';
 function Logo({to='/library',compact=false}:{to?:string;compact?:boolean}){return <Link to={to} className={`brand-logo ${compact?'compact':''}`} aria-label="Encore — home"><span className="brand-wordmark-art" aria-hidden="true"/></Link>;}
@@ -374,14 +374,17 @@ function BeatEditor() {
         if(member&&guestToken){
           const claimed=await beatService.claim(beatId,guestToken);if(controller.signal.aborted)return;setPendingGuestBeat(null);guestToken=undefined;setOutput(claimed);
         }
-        const deadline=Date.now()+60000;
+        const deadline=Date.now()+30*60*1000;
         while(!controller.signal.aborted&&Date.now()<deadline){
-          const result=await beatService.getOutput(beatId,{guestToken,signal:controller.signal});if(controller.signal.aborted)return;setOutput(result);
+          let result:BeatOutput;
+          try{result=await beatService.getOutput(beatId,{guestToken,signal:controller.signal});}
+          catch(reason){if(reason instanceof ApiError&&[0,502,503,504].includes(reason.status)){await wait();continue;}throw reason;}
+          if(controller.signal.aborted)return;setOutput(result);
           if(result.status==='completed'){if(!result.audioUrl)setError('Beat generation completed, but the backend did not provide playable audio.');setLoading(false);return;}
           if(result.status==='failed'){setError(result.error||'Beat generation failed. Please try again.');setLoading(false);return;}
           await wait();
         }
-        if(!controller.signal.aborted){setError('Beat generation timed out after 60 seconds.');setLoading(false);}
+        if(!controller.signal.aborted){setError('This beat is taking longer than expected. Reopen this page later to check its progress.');setLoading(false);}
       }catch(reason){if(!controller.signal.aborted){setError(serviceErrorMessage(reason));setLoading(false);}}
     };
     load();return()=>{controller.abort();if(timer)clearTimeout(timer);};
@@ -398,9 +401,9 @@ function BeatEditor() {
   };
   const format=(seconds:number)=>`${Math.floor(seconds/60)}:${Math.floor(seconds%60).toString().padStart(2,'0')}`;
   const unavailable=!output?.audioUrl;
-  return <main className="page output-page"><PageHeader title="Your beat" description="Listen to your generated audio and export it as an MP3."><Link className="button secondary" to="/parameters"><Settings2 size={16}/>Parameters</Link></PageHeader>
+  return <main className="page output-page"><PageHeader title="Your beat" description="Listen to your generated audio and download the WAV."><Link className="button secondary" to="/parameters"><Settings2 size={16}/>Parameters</Link></PageHeader>
     <section className="audio-output-card" aria-busy={loading}>
-      <div className="audio-output-heading"><div><span className="eyebrow">Generated output</span><h2>{output?.name??outputPreview.name}</h2></div><button className="button primary" onClick={download} disabled={!guest&&(!output||loading||output.status!=='completed')}><ArrowDownToLine size={17}/>{guest?'Sign in to export':'Download MP3'}</button></div>
+      <div className="audio-output-heading"><div><span className="eyebrow">Generated output</span><h2>{output?.name??outputPreview.name}</h2></div><button className="button primary" onClick={download} disabled={!guest&&(!output||loading||output.status!=='completed')}><ArrowDownToLine size={17}/>{guest?'Sign in to export':'Download WAV'}</button></div>
       <div className="output-waveform" aria-label="Audio waveform visualization">{values.map((value,index)=><span key={index} style={{height:`${18+value*78}%`}} className={index/values.length<time/duration?'played':''}/>)}</div>
       <div className="audio-controls">
         <button className="transport-play" onClick={togglePlayback} disabled={unavailable} aria-label={playing?'Pause beat':'Play beat'}>{playing?<Pause size={22} fill="currentColor"/>:<Play size={22} fill="currentColor"/>}</button>
@@ -422,7 +425,7 @@ function BeatEditor() {
       {!loading&&unavailable&&!error&&<p className="output-empty">The player will activate when the beat output API returns an audio file.</p>}
     </section>
     <Link className="back-link" to="/library"><ArrowLeft size={15}/>Back to sounds</Link>
-    {signInPrompt&&<SignInPrompt message="Guest mode can listen to generated beats, but MP3 export requires an account." onClose={()=>setSignInPrompt(false)}/>}
+    {signInPrompt&&<SignInPrompt message="Guest mode can listen to generated beats, but export requires an account." onClose={()=>setSignInPrompt(false)}/>}
   </main>;
 }
 function Profile() {
