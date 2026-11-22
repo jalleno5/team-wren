@@ -20,12 +20,13 @@ from pipeline import ROOT, apply_sounds, run_pipeline
 from Apply_Sounds.yamnet_mapping import load_class_table
 from Apply_Sounds.role_mapping import build_role_mapping, validate_sounds
 from percussion_pipeline import run_percussion_pipeline
-from supabase_sounds import classified_sounds, get_sound_store, sample_ids
+from supabase_sounds import classified_sounds, get_sound_store, sample_ids, SignedSounds
 
 OUTPUTS = Path(os.getenv("MUSIC_OUTPUT_DIR", str(ROOT / "outputs"))).resolve()
 POOL = ThreadPoolExecutor(max_workers=1)
 SLOTS = threading.BoundedSemaphore(4)  # One running job and at most three waiting.
 LOCK = threading.Lock()
+SUBMISSION_LOCK = threading.Lock()
 AUTH = HTTPBearer(auto_error=False)
 
 
@@ -97,6 +98,8 @@ app = FastAPI(title="Everyday sound music worker", lifespan=lifespan,
 
 
 class GenerationRequest(BaseModel):
+    job_id: UUID | None = None
+    sample_sources: list[dict] | None = Field(default=None, min_length=1, max_length=4)
     prompt: str = Field(min_length=1, max_length=2000)
     duration: float = Field(default=10, ge=1, le=30)
     mapping: dict | None = None
@@ -225,6 +228,8 @@ def execute(folder, request, samples):
 
 
 def submit(request, store=None):
+    if isinstance(request, GenerationRequest) and request.sample_sources is not None:
+        store = SignedSounds(request.sample_sources)
     if request.mapping is not None and request.sounds is not None:
         raise HTTPException(422, "Supply mapping or sounds, not both")
     if isinstance(request, RenderRequest) and request.mapping is None and request.sounds is None:
@@ -250,7 +255,7 @@ def submit(request, store=None):
             validate_percussion_request(request, sounds_dir)
         else:
             validate_mapping(request.mapping, sounds_dir)
-        folder = OUTPUTS / str(uuid4())
+        folder = OUTPUTS / str(getattr(request, "job_id", None) or uuid4())
         folder.mkdir(parents=True)
         update_job(folder, id=folder.name, status="queued")
         POOL.submit(execute, folder, request, samples)
@@ -268,7 +273,13 @@ def submit(request, store=None):
 def create_job(request: GenerationRequest, store=Depends(get_sound_store)):
     if not request.prompt.strip():
         raise HTTPException(422, "Prompt must not be blank")
-    return submit(request, store)
+    # Node uses the beat UUID as an idempotency key. A retry after a lost
+    # response or API restart resumes the same job rather than generating again.
+    with SUBMISSION_LOCK:
+        if request.job_id is not None and (job_dir(str(request.job_id)) / "job.json").is_file():
+            job = read_job(str(request.job_id))
+            return {"id": job["id"], "status": job["status"], "status_url": f"/music/jobs/{job['id']}"}
+        return submit(request, store)
 
 
 @app.post("/music/percussion-jobs", status_code=202)

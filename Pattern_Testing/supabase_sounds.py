@@ -1,7 +1,7 @@
 """Resolve sound IDs through RLS, then stage Storage audio for the renderer."""
 import os
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from uuid import UUID
 
 import httpx
@@ -105,6 +105,48 @@ def classified_sounds(sounds, records):
     return [{"file": sound["file"], "classification": records[sound["file"]].get("classification"),
              **{key: sound[key] for key in ("root_note", "loop") if key in sound}}
             for sound in sounds]
+
+
+class SignedSounds:
+    """Server-authorized manifest for background/guest jobs; no stored user JWT.
+
+    Only callers holding MUSIC_API_KEY may submit this manifest. Node rechecks
+    ownership/public visibility and issues short-lived Supabase signed links.
+    """
+    def __init__(self, sources):
+        self.sources = sources
+
+    def download(self, ids, destination):
+        if len(self.sources) != len(ids) or {s.get("file") for s in self.sources} != set(ids):
+            raise HTTPException(422, "Sample sources must match selected sound IDs exactly")
+        base = urlsplit(os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL", ""))
+        if not base.netloc:
+            raise HTTPException(503, "Worker Supabase URL is not configured")
+        records = {}
+        try:
+            with httpx.Client(timeout=30, follow_redirects=False) as client:
+                for source in self.sources:
+                    url = urlsplit(source.get("audio_url", ""))
+                    if (url.scheme, url.netloc) != (base.scheme, base.netloc) or not any(
+                        url.path.startswith(f"{base.path.rstrip('/')}/storage/v1/object/sign/{bucket}/")
+                        for bucket in BUCKETS.values()
+                    ):
+                        raise HTTPException(422, "Sample URLs must be signed sound URLs from the configured Supabase project")
+                    with client.stream("GET", source["audio_url"]) as response:
+                        SupabaseSounds.check(response)
+                        total = 0
+                        with (Path(destination) / source["file"]).open("wb") as output:
+                            for chunk in response.iter_bytes():
+                                total += len(chunk)
+                                if total > MAX_SAMPLE_BYTES:
+                                    raise HTTPException(422, "Sound audio exceeds 10 MB")
+                                output.write(chunk)
+                        if not total:
+                            raise HTTPException(422, "Sound audio is empty")
+                    records[source["file"]] = {"classification": source.get("classification")}
+        except httpx.HTTPError:
+            raise HTTPException(502, "Could not fetch sound from Supabase") from None
+        return records
 
 
 def get_sound_store(x_supabase_authorization: str | None = Header(default=None)):

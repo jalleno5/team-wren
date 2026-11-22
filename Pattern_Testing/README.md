@@ -127,9 +127,13 @@ failure. Missing/inaccessible sounds fail before a job is accepted; downloads
 are limited to 10 MB per sample. Requests without samples need only the worker
 key. Compressed recordings such as WebM require FFmpeg on the worker's PATH.
 
-The server helpers in `integration/worker-client.js` accept a
-`supabaseAccessToken` argument. They remain integration examples; the app's
-`POST /api/beats` route is not yet connected to the worker.
+The Node background worker uses `integration/worker-client.js` to submit jobs
+and retrieve results. It sends `job_id` equal to the beat UUID for idempotent
+retries and `sample_sources` containing short-lived Supabase signed URLs and
+persisted per-beat classifications. This trusted server path requires the
+worker key and does not require a user JWT. Direct user-scoped worker requests
+can continue using `X-Supabase-Authorization` as described above. See
+[application setup](../docs/integration.md#real-generation-after-the-background-worker-merge).
 
 Local CLI commands still accept sample filenames and `--sounds`; only the
 HTTP API uses Supabase IDs.
@@ -141,6 +145,12 @@ The worker reads `sounds.classification` from Supabase: `Percussion`, `Rhythmic`
 `yamnet_class`, and `user_class` do not override this database role. Sounds
 without a valid classification are rejected before an automatic job is queued.
 Explicit manual mappings can still use unclassified sounds.
+
+The trusted Node background service additionally supports a `sample_sources`
+manifest: these roles come from persisted `sounds_beats.category`, falling back
+to the sound's global classification. This preserves the merged frontend's
+per-beat role choices. Only the backend holding `MUSIC_API_KEY` may submit
+these scoped, signed sample URLs.
 
 To generate and automatically render in one job, send `POST /music/jobs`:
 

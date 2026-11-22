@@ -2,7 +2,7 @@
 // Keep the association {user_id, worker_job_id} in your DB and check ownership on
 // every status/download request. A worker ID alone is not user authorization.
 export async function workerRequest(path, { method = 'GET', body, supabaseAccessToken } = {}) {
-  const response = await fetch(`${process.env.MUSIC_WORKER_URL}${path}`, {
+  const response = await fetch(`${process.env.MUSIC_WORKER_URL.replace(/\/$/, '')}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${process.env.MUSIC_API_KEY}`,
@@ -10,8 +10,13 @@ export async function workerRequest(path, { method = 'GET', body, supabaseAccess
       ...(body ? { 'Content-Type': 'application/json' } : {}),
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
+    signal: AbortSignal.timeout(method === 'POST' ? 120_000 : 60_000),
   });
-  if (!response.ok) throw new Error(`Music worker returned ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(`Music worker returned ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
   return response;
 }
 
