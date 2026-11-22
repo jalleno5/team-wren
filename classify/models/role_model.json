@@ -1,0 +1,152 @@
+{
+  "role_ids": [
+    "percussion",
+    "rhythmic",
+    "melodic",
+    "ambient",
+    "transition"
+  ],
+  "feature_set": "emb+desc",
+  "trained_at": "2026-11-21T16:53:22+00:00",
+  "n_clips": 294,
+  "n_groups": 49,
+  "n_raters": 1,
+  "model": "one-vs-rest logistic regression on standardised features",
+  "regularisation_C": 0.1,
+  "class_weight": "balanced",
+  "support": {
+    "percussion": 78,
+    "rhythmic": 102,
+    "melodic": 72,
+    "ambient": 150,
+    "transition": 102
+  },
+  "roles_left_to_acoustic_prior": [],
+  "evaluation": {
+    "protocol": "leave-one-group-out",
+    "n_clips": 294,
+    "n_groups": 49,
+    "this_model": {
+      "hit@2": {
+        "mean": 0.878,
+        "ci95": [
+          0.806,
+          0.935
+        ]
+      },
+      "precision@2": {
+        "mean": 0.573,
+        "ci95": [
+          0.509,
+          0.639
+        ]
+      },
+      "recall@2": {
+        "mean": 0.711,
+        "ci95": [
+          0.628,
+          0.784
+        ]
+      },
+      "top1": {
+        "mean": 0.728,
+        "ci95": [
+          0.636,
+          0.81
+        ]
+      },
+      "ap": {
+        "mean": 0.809,
+        "ci95": [
+          0.758,
+          0.856
+        ]
+      }
+    },
+    "acoustic_prior": {
+      "hit@2": {
+        "mean": 0.878,
+        "ci95": [
+          0.816,
+          0.929
+        ]
+      },
+      "precision@2": {
+        "mean": 0.541,
+        "ci95": [
+          0.49,
+          0.594
+        ]
+      },
+      "recall@2": {
+        "mean": 0.66,
+        "ci95": [
+          0.594,
+          0.724
+        ]
+      },
+      "top1": {
+        "mean": 0.636,
+        "ci95": [
+          0.548,
+          0.724
+        ]
+      },
+      "ap": {
+        "mean": 0.746,
+        "ci95": [
+          0.697,
+          0.79
+        ]
+      }
+    },
+    "random": {
+      "hit@2": {
+        "mean": 0.614,
+        "ci95": [
+          0.578,
+          0.651
+        ]
+      },
+      "precision@2": {
+        "mean": 0.343,
+        "ci95": [
+          0.318,
+          0.367
+        ]
+      },
+      "recall@2": {
+        "mean": 0.4,
+        "ci95": [
+          0.4,
+          0.4
+        ]
+      },
+      "top1": {
+        "mean": 0.343,
+        "ci95": [
+          0.318,
+          0.367
+        ]
+      },
+      "ap": null
+    },
+    "ap_gain_vs_prior": {
+      "ap_gain": 0.064,
+      "ci95": [
+        0.007,
+        0.122
+      ]
+    }
+  },
+  "format_version": 1,
+  "preprocess_version": "pre-1",
+  "encore_version": "0.1.0",
+  "all_role_ids": [
+    "percussion",
+    "rhythmic",
+    "melodic",
+    "ambient",
+    "transition"
+  ]
+}
