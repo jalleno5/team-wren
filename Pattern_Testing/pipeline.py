@@ -11,6 +11,7 @@ from typing import Callable
 import mido
 
 from Apply_Sounds.render_midi_sounds import apply_sounds, extract_notes
+from Apply_Sounds.role_mapping import build_role_mapping, validate_sounds
 
 ROOT = Path(__file__).resolve().parent
 
@@ -45,10 +46,14 @@ def inspect_midi(path: Path) -> dict:
             "drums": sorted({n[2] for n in notes if n[5]})}
 
 
-def run_pipeline(prompt: str, output_dir: Path, *, duration=10, mapping=None,
+def run_pipeline(prompt: str, output_dir: Path, *, duration=10, mapping=None, sounds=None,
                  sounds_dir=None, model="facebook/musicgen-small",
                  progress: Callable[[str], None] = lambda stage: None) -> dict:
     """Always return the generated WAV and downloadable MIDI; rendering is optional."""
+    if mapping is not None and sounds is not None:
+        raise ValueError("Supply mapping or database-classified sounds, not both")
+    if sounds is not None:
+        validate_sounds(sounds)
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     progress("generating")
@@ -57,9 +62,16 @@ def run_pipeline(prompt: str, output_dir: Path, *, duration=10, mapping=None,
     midi = transcribe_audio(audio, output_dir / "transcribed.mid")
     result = {"artifacts": {"audio": audio.name, "midi": midi.name}, "midi": inspect_midi(midi)}
     # MIDI remains available even if the optional sample rendering fails.
-    if mapping is not None:
+    if mapping is not None or sounds is not None:
         progress("rendering")
         try:
+            if sounds is not None:
+                report = build_role_mapping(sounds, midi)
+                result["mapping_report"] = report
+                mapping = report["mapping"]
+                result["mapping"] = mapping
+                if not any(mapping.values()):
+                    raise ValueError("No selected sounds have roles compatible with the MIDI instruments")
             result["render"] = apply_sounds(midi, mapping, output_dir / "rendered.wav", sounds_dir=sounds_dir)
             result["artifacts"]["rendered"] = "rendered.wav"
         except (ValueError, OSError, KeyError, TypeError) as exc:

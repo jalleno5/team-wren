@@ -88,6 +88,7 @@ def mix_tracks(accompaniment, percussion, reference_drums, output, *,
 
 def run_percussion_pipeline(prompt, output_dir, *, source_audio=None, duration=10,
                             mapping=None, sounds=None, sounds_dir=None,
+                            mapping_builder=build_sound_mapping,
                             model="facebook/musicgen-small", drums_gain_db=0,
                             accompaniment_gain_db=0, progress=lambda stage: None):
     if (mapping is None) == (sounds is None):
@@ -121,8 +122,10 @@ def run_percussion_pipeline(prompt, output_dir, *, source_audio=None, duration=1
     keep_drum_notes(raw, midi)
     mapping_report = None
     if sounds is not None:
-        mapping_report = build_sound_mapping(sounds, midi)
+        mapping_report = mapping_builder(sounds, midi)
         mapping = mapping_report["mapping"]
+        if not any(mapping.values()):
+            raise ValueError("No selected sounds have roles compatible with the drum MIDI")
     (folder / "mapping.json").write_text(json.dumps(mapping, indent=2) + "\n", encoding="utf-8")
     progress("rendering_percussion")
     render = apply_sounds(midi, mapping, folder / "percussion.wav", sounds_dir=sounds_dir)
