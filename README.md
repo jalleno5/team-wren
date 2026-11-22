@@ -31,7 +31,7 @@ The sign-in screen also offers guest mode. Guests can browse and select up to fo
 
 During `npm run dev`, the sign-in page includes a clearly labeled testing bypass that starts a member-mode session. Vite removes this control from production builds.
 
-Beat generation currently sends only tempo/speed, genre, selected sound IDs, and an optional title. Unsupported length and advanced controls are intentionally hidden.
+Moving from Sounds to Parameters classifies each selected sample into a beat-specific role: Percussion, Rhythmic, Melodic, Ambient, or Transition. The Parameters screen lets the user override each result before generation. Beat generation sends tempo/speed, genre, and every selected sound paired with its category.
 
 ## Not implemented
 

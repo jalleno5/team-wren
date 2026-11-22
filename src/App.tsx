@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { Link, NavLink, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowDownToLine, ArrowLeft, ArrowRight, AudioLines, Beaker, Check, Flag, Globe2, Info, LockKeyhole, LogOut, Mic, Pause, Play, Plus, RotateCcw, Search, Settings2, Trash2, Upload, X } from 'lucide-react';
-import { MIN_TEMPO, MAX_TEMPO, genres, type SoundView } from './model';
+import { MIN_TEMPO, MAX_TEMPO, genres, soundCategories as categoryOptions, type SoundCategory, type SoundView } from './model';
 import { outputPreview, sounds } from './fixtures';
 import { beatService, profileService, serviceErrorMessage, soundService, type BeatOutput } from './services';
 import { useSession } from './session';
@@ -49,7 +49,7 @@ export default function App() {
 }
 function RequireAccess(){const {mode}=useSession();if(mode==='loading')return <main className="page"><p className="muted" role="status">Restoring your session…</p></main>;return mode==='signedOut'?<Navigate to="/login" replace/>:<Outlet/>;}
 function RequireMember({children}:{children:ReactNode}){const {member}=useSession();return member?children:<Navigate to="/login" replace/>;}
-function RequireSounds({children}:{children:ReactNode}){const {selectedSounds}=useSession();return selectedSounds.length?children:<Navigate to="/library" replace/>;}
+function RequireSounds({children}:{children:ReactNode}){const {selectedSounds,soundCategories}=useSession();return selectedSounds.length&&selectedSounds.every(sound=>soundCategories[sound.id])?children:<Navigate to="/library" replace/>;}
 function RequireGeneratedBeat({children}:{children:ReactNode}){const {generatedBeatId}=useSession();const {search}=useLocation();if(!generatedBeatId)return <Navigate to="/parameters" replace/>;const requested=new URLSearchParams(search).get('id');return requested===generatedBeatId?children:<Navigate to={`/beat?id=${encodeURIComponent(generatedBeatId)}`} replace/>;}
 function Login() {
   const [status,setStatus]=useState<'idle'|'loading'|'error'>('idle');
@@ -75,7 +75,8 @@ function Login() {
 }
 function Workflow() {
   const {pathname}=useLocation();
-  const {selectedSounds,generatedBeatId}=useSession();
+  const navigate=useNavigate();
+  const {selectedSounds,soundCategories,classifyingSounds,generatedBeatId,prepareParameters}=useSession();
   if(pathname==='/profile')return null;
   const steps=[
     {path:'/library',name:'Sounds',enabled:true,disabledReason:''},
@@ -83,7 +84,7 @@ function Workflow() {
     {path:generatedBeatId?`/beat?id=${encodeURIComponent(generatedBeatId)}`:'/beat',name:'Listen & export',enabled:Boolean(generatedBeatId),disabledReason:'Generate a beat first'},
   ];
   return <nav className="workflow" aria-label="Create a beat steps">{steps.map((step,index)=><div className="workflow-step" key={step.path}>
-    <Link to={step.path} aria-current={pathname===new URL(step.path,window.location.origin).pathname?'step':undefined} aria-disabled={!step.enabled} tabIndex={step.enabled?undefined:-1} title={!step.enabled?step.disabledReason:undefined} onClick={event=>{if(!step.enabled)event.preventDefault();}} className={`${pathname===new URL(step.path,window.location.origin).pathname?'current':''} ${!step.enabled?'disabled':''}`.trim()}><span>{index+1}</span>{step.name}</Link>
+    <Link to={step.path} aria-current={pathname===new URL(step.path,window.location.origin).pathname?'step':undefined} aria-disabled={!step.enabled||index===1&&classifyingSounds} tabIndex={step.enabled&&!(index===1&&classifyingSounds)?undefined:-1} title={!step.enabled?step.disabledReason:undefined} onClick={async event=>{if(!step.enabled||index===1&&classifyingSounds){event.preventDefault();return;}if(index===1&&selectedSounds.some(sound=>!soundCategories[sound.id])){event.preventDefault();if(await prepareParameters())navigate('/parameters');}}} className={`${pathname===new URL(step.path,window.location.origin).pathname?'current':''} ${!step.enabled?'disabled':''}`.trim()}><span>{index+1}</span>{index===1&&classifyingSounds?'Classifying…':step.name}</Link>
     {index<2&&<ArrowRight size={28}/>}
   </div>)}</nav>;
 }
@@ -256,7 +257,8 @@ function RecordDialog({onClose,onSaved}:{onClose:()=>void;onSaved:(sound:SoundVi
 }
 
 function LibraryPage() {
-  const {guest,selectedSounds,toggleSound,removeSound}=useSession();
+  const {guest,selectedSounds,toggleSound,removeSound,classifyingSounds,classificationError,prepareParameters}=useSession();
+  const navigate=useNavigate();
   const [tab,setTab]=useState<'mine'|'public'>(guest?'public':'mine');
   const [signInPrompt,setSignInPrompt]=useState('');
   const [query,setQuery]=useState('');
@@ -299,7 +301,8 @@ function LibraryPage() {
       {serviceError&&<p className="service-message error" role="alert">{serviceError}</p>}
     </section><aside className="beat-tray"><div className="mobile-tray-title"><div className="tray-heading"><h3>Selected sounds</h3><span className="count">{selectedSounds.length}</span></div></div>
       <div className="tray-sounds">{selectedSounds.map((sound,index)=><div className="tray-sound" key={sound.id}><span className="track-number">{String(index+1).padStart(2,'0')}</span><div><strong>{sound.name}</strong></div><button className="icon-button" aria-label={`Remove ${sound.name}`} onClick={()=>removeSound(sound.id)}><X size={14}/></button></div>)}</div>
-      {selectedSounds.length?<Link to="/parameters" className="button primary full continue-action">Continue to parameters<ArrowRight size={21}/></Link>:<button className="button primary full continue-action" disabled aria-label="Select at least one sound to continue">Select a sound to continue</button>}
+      {selectedSounds.length?<button className="button primary full continue-action" disabled={classifyingSounds} onClick={async()=>{if(await prepareParameters())navigate('/parameters');}}>{classifyingSounds?'Classifying sounds…':<>Continue to parameters<ArrowRight size={21}/></>}</button>:<button className="button primary full continue-action" disabled aria-label="Select at least one sound to continue">Select a sound to continue</button>}
+      {classificationError&&<p className="service-message error" role="alert">{classificationError}</p>}
     </aside></div>
     {dialog?.type==='Record sound'&&<RecordDialog onClose={()=>setDialog(null)} onSaved={sound=>setLibrarySounds(current=>[sound,...current])}/>}
     {dialog?.type==='Delete sound'&&<ActionDialog title={dialog.type} onClose={()=>setDialog(null)}>
@@ -320,7 +323,7 @@ function SelectField({label,value,options,onChange}:{label:string;value:string;o
   return <label className="form-label">{label}<select value={value} onChange={event=>onChange?.(event.target.value)}>{options.map(option=><option key={option} value={option}>{option[0].toUpperCase()+option.slice(1)}</option>)}</select></label>;
 }
 function Parameters() {
-  const {guest,selectedSounds,setPendingGuestBeat,setGeneratedBeatId}=useSession();
+  const {guest,selectedSounds,soundCategories,setSoundCategory,setPendingGuestBeat,setGeneratedBeatId}=useSession();
   const [tempo,setTempo]=useState(120);
   const [genre,setGenre]=useState('electronic');
   const [generating,setGenerating]=useState(false);
@@ -330,7 +333,7 @@ function Parameters() {
     if(!selectedSounds.length){setError('Select at least one sound before generating a beat.');return;}
     setGenerating(true);setError('');
     try{
-      const beat=await beatService.generate({soundIds:selectedSounds.map(sound=>sound.id),parameters:{tempo,genre},guest});
+      const beat=await beatService.generate({sounds:selectedSounds.map(sound=>({soundId:sound.id,category:soundCategories[sound.id]})),parameters:{tempo,genre},guest});
       if(guest&&beat.guestToken)setPendingGuestBeat({id:beat.id,token:beat.guestToken});
       setGeneratedBeatId(beat.id);
       navigate(`/beat?id=${encodeURIComponent(beat.id)}`);
@@ -342,6 +345,7 @@ function Parameters() {
       <input id="tempo" aria-label="Tempo" type="range" min={MIN_TEMPO} max={MAX_TEMPO} value={tempo} onChange={event=>setTempo(Number(event.target.value))}/>
       <div className="range-labels"><span>{MIN_TEMPO} BPM</span><span>{MAX_TEMPO} BPM</span></div>
       <SelectField label="Style / genre" value={genre} options={genres} onChange={setGenre}/>
+      <fieldset className="sound-category-list"><legend>Sound categories</legend><p className="muted">Adjust how each sound is used in this beat.</p>{selectedSounds.map(sound=><SelectField key={sound.id} label={sound.name} value={soundCategories[sound.id]} options={categoryOptions} onChange={value=>setSoundCategory(sound.id,value as SoundCategory)}/>)}</fieldset>
     </section><aside className="panel session-summary"><h2>Your settings</h2>{[['Sounds',String(selectedSounds.length)],['Tempo',`${tempo} BPM`],['Style',genre]].map(([label,value])=><div className="summary-row" key={label}><span>{label}</span><strong>{value}</strong></div>)}
       <button className="button primary full" onClick={generate} disabled={generating||!selectedSounds.length}>{generating?'Generating…':'Generate beat'}</button>{error&&<p className="service-message error" role="alert">{error}</p>}<Link className="back-link" to="/library"><ArrowLeft size={14}/>Back to sounds</Link>
     </aside></div>

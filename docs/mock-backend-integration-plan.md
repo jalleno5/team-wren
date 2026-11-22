@@ -37,9 +37,10 @@ client-supplied `user_id`. Never put a Supabase service-role key in Vite.
 - Reporting retains the mock backend model: `sound_reports.description`. The
   frontend's selected reason is sent as `description`; no moderation `status`
   field is required for this integration.
-- Beat generation currently sends only `speed` (mapped from tempo), `genre`, and
-  `sound_ids`, plus an optional title. Other visible frontend parameters are not
-  part of the backend contract yet.
+- Beat generation sends `speed` (mapped from tempo), `genre`, and a `sounds`
+  array pairing each `sound_id` with its beat-specific `category`, plus an
+  optional title. Other visible frontend parameters are not part of the backend
+  contract yet.
 - Export is a direct download of the generated audio file; there is no separate
   MP3 conversion job.
 - Guests may select public sounds, generate a beat, and listen to it. Creating a
@@ -83,7 +84,7 @@ The mock starts with:
 - Three sounds owned by `user-1`: two private and one public.
 - Two public sounds owned by other users.
 - One completed private beat using two owned sounds.
-- Four deterministic sets of three YAMNet-like classification results.
+- Five deterministic sound categories.
 - No sound reports.
 
 A sound is visible when it belongs to `user-1` or has `visibility: "public"`.
@@ -126,7 +127,7 @@ source type, or trim boundaries.
 
 | Method and path | Request | Success and validation |
 | --- | --- | --- |
-| `POST /api/classify` | `{ sound_id }` | Returns `{ sound_id, labels }`, where `labels` is a deterministic array of three `{ label, score }` objects. A missing or invisible sound returns `404`. |
+| `POST /api/classify` | `{ sound_id }` | Returns `{ sound_id, category }`, where `category` is one of `percussion`, `rhythmic`, `melodic`, `ambient`, or `transition`. A missing or invisible sound returns `404`. |
 
 The result is selected by hashing the characters in the sound ID. No model or
 audio processing runs in the mock.
@@ -136,7 +137,7 @@ audio processing runs in the mock.
 | Method and path | Request | Success and validation |
 | --- | --- | --- |
 | `GET /api/beats` | None | Returns all beats owned by `user-1`. |
-| `POST /api/beats` | `{ title?, speed, genre?, sound_ids }` | Validates 1–4 visible sounds and an integer speed from 60–200. Creates a private queued beat and returns `202 { id, status: "queued" }`. A blank title becomes `Untitled beat`. |
+| `POST /api/beats` | `{ title?, speed, genre?, sounds: [{ sound_id, category }] }` | Validates 1–4 unique visible sounds, an allowed category for each sound, and an integer speed from 60–200. Creates a private queued beat and returns `202 { id, status: "queued" }`. A blank title becomes `Untitled beat`. |
 | `GET /api/beats/:id` | None | Returns an owned or public beat. The first read of a newly queued beat returns `queued` but mutates stored state to `completed`; the second read returns `completed` with `/mock-audio/<id>.wav`. Missing/private foreign beats return `404`. |
 
 The mock does not serve the `/mock-audio/*` files. It also has no export route,
@@ -152,8 +153,8 @@ The merged migrations define these tables:
   `visibility`, `created_at`.
 - `beats`: `id`, `user_id`, `title`, `speed`, `genre`, `visibility`,
   `created_at`.
-- `sounds_beats`: junction rows containing `sound_id`, `beat_id`, and
-  `created_at`.
+- `sounds_beats`: junction rows containing `sound_id`, `beat_id`, beat-specific
+  `category`, and `created_at`.
 - `sound_reports`: `sound_id`, `reporter_id`, optional `description`, and
   `created_at`.
 
@@ -184,7 +185,7 @@ Two policies need attention before real integration:
 | Recording metadata | Trim start/end and waveform | Missing | Only required `source_type` and `duration_in_ms` exist |
 | Flag/report | `sound_flags` with `reason` and `status` | `sound_reports.description` | Retain `sound_reports.description`; map the selected reason into it and remove the frontend status dependency |
 | Beat tempo | `parameters.tempo` | `speed` | `speed` |
-| Beat sounds | `soundIds` | Inline `sound_ids` | `sounds_beats` junction table |
+| Beat sounds | Categorized sound array | Inline `sounds` | `sounds_beats` junction table with `category` |
 | Generation output | Name, duration, waveform, playback/download URLs | Status and relative WAV URL | No status or output fields |
 | Extra generation parameters | Length, ensemble, meter, key, mode, instruments | Ignored/not accepted | No columns |
 | Profile update | Username and email; separate photo upload | Username/avatar URL only | Username, email, avatar URL |
@@ -205,7 +206,7 @@ modified here before the later merge.
 ### 1. Freeze the shared API contract
 
 - Add TypeScript DTOs that match API wire names exactly (`title`, `speed`,
-  `sound_ids`, `description`) and map them into the existing UI models at the
+  `sounds`, `sound_id`, `category`, `description`) and map them into the existing UI models at the
   service boundary.
 - Keep presentation-only fields such as `owned` computed in the adapter.
 - Add a single API client that handles JSON, `204`, `{ error }`, abort signals,
@@ -270,7 +271,7 @@ modified here before the later merge.
 
 ### 5. Connect beat generation and output
 
-- Map frontend `tempo` to API `speed` and submit `genre`, selected sound IDs, and
+- Map frontend `tempo` to API `speed` and submit `genre`, categorized sounds, and
   an optional title. Do not send length, ensemble, meter, key, mode, or
   per-sound instruments until the worker contract expands. The UI should not
   imply those unsupported values affect generation.
