@@ -2,6 +2,9 @@
 export const MIN_TEMPO = 60;
 export const MAX_TEMPO = 200;
 export const genres = ['classical','popular','jazz','folk','electronic','soundtrack','world','religious','unknown'] as const;
+export const soundCategories = ['percussion','rhythmic','melodic','ambient','transition'] as const;
+export type SoundCategory = typeof soundCategories[number];
+export function isSoundCategory(value:unknown):value is SoundCategory{return typeof value==='string'&&soundCategories.includes(value as SoundCategory);}
 export const ensembles = ['solo','duo','band','chamber','orchestral','choir','other'] as const;
 export const modes = ['major','minor','dorian','phrygian','lydian','mixolydian','none'] as const;
 export interface SoundView {
