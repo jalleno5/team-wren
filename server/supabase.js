@@ -6,10 +6,21 @@ import { HttpError } from './http.js'
 // process.env holds values from .env.local
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY
+// no VITE_ in front so vite never puts it in the browser code
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error('Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local')
 }
+if (!SUPABASE_SECRET_KEY) {
+  throw new Error('Set SUPABASE_SECRET_KEY in .env.local (dashboard > project settings > api keys > secret)')
+}
+
+// skips rls, only for things no logged in user owns: the beat worker and guest beats
+// routes must check who is asking themselves before using this
+export const admin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+})
 
 // pulls out user token (frontend sends the header "Authorization: Bearer <token>")
 function readToken(request) {

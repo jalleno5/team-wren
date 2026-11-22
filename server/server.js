@@ -4,6 +4,7 @@ import { createServer } from 'node:http'
 import { HttpError, readJsonBody, sendJson } from './http.js'
 import { connectAs } from './supabase.js'
 import { findRoute } from './routes.js'
+import { startBeatWorker } from './worker.js'
 
 const PORT = Number(process.env.API_PORT) || 3001
 
@@ -37,6 +38,10 @@ const server = createServer(async (request, response) => {
             body,
             db,
             user,
+            // guests send this to prove a beat is theirs
+            guestToken: request.headers['x-guest-job-token'] || null,
+            // for the guest beats per hour limit
+            ip: request.socket.remoteAddress,
         })
         status = result.status
         sendJson(response, result.status, result.body)
@@ -54,4 +59,5 @@ const server = createServer(async (request, response) => {
 
 server.listen(PORT, () => {
     console.log(`API running at http://localhost:${PORT}`)
+    startBeatWorker()
 })
