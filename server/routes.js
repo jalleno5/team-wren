@@ -152,9 +152,9 @@ async function toBeatWithAudio(row, canListen) {
   return beat
 }
 
-// links each sound to the beat, if that fails the half made beat is deleted
-async function linkSounds(client, beatId, soundIds) {
-  const links = soundIds.map((soundId) => ({ beat_id: beatId, sound_id: soundId }))
+// links each sound to the beat with its category, if that fails the half made beat is deleted
+async function linkSounds(client, beatId, sounds) {
+  const links = sounds.map((sound) => ({ beat_id: beatId, sound_id: sound.sound_id, category: sound.category }))
   const { error } = await client.from('sounds_beats').insert(links)
   if (error) {
     await client.from('beats').delete().eq('id', beatId)
@@ -380,9 +380,9 @@ const routes = {
 
   // members and guests can both make beats, guests get a guest_token back to poll and later claim it
   'POST /api/beats': async ({ body, db, user, ip }) => {
-    const soundIds = body.sound_ids
-    if (!Array.isArray(soundIds) || soundIds.length === 0) throw new HttpError(400, 'Pick at least one sound')
-    if (soundIds.length > MAX_SOUNDS_PER_BEAT) {
+    const sounds = body.sounds
+    if (!Array.isArray(sounds) || sounds.length === 0) throw new HttpError(400, 'Pick at least one sound')
+    if (sounds.length > MAX_SOUNDS_PER_BEAT) {
       throw new HttpError(400, `A beat can use at most ${MAX_SOUNDS_PER_BEAT} sounds`)
     }
     const soundIds = sounds.map((sound) => sound?.sound_id)
@@ -413,7 +413,7 @@ const routes = {
       const { data: beat, error } = await db
         .from('beats').insert({ user_id: user.id, ...fields }).select('id, status').single()
       failIf(error)
-      await linkSounds(db, beat.id, soundIds)
+      await linkSounds(db, beat.id, sounds)
       // 202 = "accepted, still working on it"
       return reply(202, { id: beat.id, status: beat.status })
     }
@@ -441,7 +441,7 @@ const routes = {
       .select('id, status')
       .single()
     failIf(error)
-    await linkSounds(admin, beat.id, soundIds)
+    await linkSounds(admin, beat.id, sounds)
     return reply(202, { id: beat.id, status: beat.status, guest_token: guestToken })
   },
 

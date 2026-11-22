@@ -8,7 +8,8 @@ import { admin } from './supabase.js'
 const POLL_MS = 2000            // look for new beats every 2 seconds
 const CLEANUP_MS = 60 * 1000    // look for expired guest beats every minute
 export const BEAT_BUCKET = 'beats'
-const PLACEHOLDER_FILE = new URL('../Pattern_Testing/Songs/Music_Gen_Songs/musicgen_output.wav', import.meta.url)
+// kept next to the server so moving things in Pattern_Testing can't break the worker
+const PLACEHOLDER_FILE = new URL('./placeholder-beat.wav', import.meta.url)
 
 // stand in for real generation, gets the beat row (speed, genre) and gives back the finished wav
 // _beat isn't used yet, the real generator will need it
