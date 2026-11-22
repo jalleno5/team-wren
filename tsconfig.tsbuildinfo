@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/audio.ts","./src/main.tsx","./src/model.ts","./src/services.ts","./vite.config.ts"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/audio.ts","./src/fixtures.ts","./src/main.tsx","./src/model.ts","./src/services.ts","./src/session.tsx","./src/vite-env.d.ts","./src/lib/supabase.d.ts"],"version":"5.9.3"}
