@@ -1,18 +1,18 @@
-cd into the Apply_Sounds directory
-cd ./Apply_Sounds
+Apply sounds to MIDI
 
-In order to apply the sounds you must have a mapping json and the requirements installed
-Run the below line to do so:
-python -m pip install -r requirements.txt
+Use the shared environment and run commands from pattern_testing.
+See ../README.md for installation and generation instructions.
 
-Create your json mapping
-Choosing which sounds go where could be automated in the future but seems classification related
-Right now you must manually add sound path
-python new_sound_map.py "../MIDI_sequences/beat1.mid"
+After the pipeline creates outputs/local/transcribed.mid:
 
+python Apply_Sounds/yamnet_mapping.py Sounds/everyday_classifications.json --midi outputs/local/transcribed.mid --output outputs/local/mapping.json
+python Apply_Sounds/render_midi_sounds.py "../outputs/local/transcribed.mid" --mapping "../outputs/local/mapping.json" --output-dir "../outputs/local" --output rendered.wav
 
+The output is outputs/local/rendered.wav. The input MIDI is unchanged.
+The renderer CLI resolves relative paths from Apply_Sounds.
 
-To apply the sounds and get your output run the following
-python render_midi_sounds.py "../MIDI_sequences/jazz.mid" --mapping sound_map.json --output jazz_custom.wav
+To create an editable mapping template instead:
+python Apply_Sounds/new_sound_map.py "../outputs/local/transcribed.mid" --output "../outputs/local/custom_map.json"
 
-This will lead to generating a midi file in the midi_sequences folder.
+Replace its placeholders with filenames from Sounds before rendering.
+The callable apply_sounds() function also accepts a dictionary or JSON path.

@@ -33,12 +33,18 @@ error bodies.
 | Report a sound | `POST /api/sounds/:id/reports` with `{ description }`; stored as `sound_reports.reason` |
 | Signed upload | `POST /api/uploads` with `{ purpose: "sound", content_type, size_bytes }` returns `{ upload_url, storage_path, headers? }`; the browser then `PUT`s the file and calls `POST /api/sounds` |
 | Sound playback | `GET /api/sounds/:id/playback` returns `{ url, trim_start_seconds }` (a signed link valid for 1 hour) |
-| Queue a beat | `POST /api/beats` with `{ title?, speed, genre, sound_ids }` |
+| Classify a sound | `POST /api/classify` with `{ sound_id }` returns `{ sound_id, category }` |
+| Queue a beat | `POST /api/beats` with `{ title?, speed, genre, sounds: [{ sound_id, category }] }` |
 | Poll a beat | `GET /api/beats/:id`, once per second for at most 60 seconds |
 
+The in-memory mock implements classification deterministically. In production,
+`POST /api/classify` is the boundary supplied by the sound-classification
+backend; this repository validates and consumes its category response but does
+not contain the classifier model itself.
+
 Wire fields are mapped at the service boundary: sound `title` becomes UI
-`name`, tempo becomes beat `speed`, and the selected report reason becomes
-`description`. Ownership is calculated from the current profile ID. Missing
+`name`, tempo becomes beat `speed`, category labels become lowercase wire
+values, and the selected report reason becomes `description`. Ownership is calculated from the current profile ID. Missing
 creator/waveform fields receive presentation-only labels and waveform values;
 they are never written back as real backend data.
 
@@ -79,6 +85,10 @@ export const GUEST_GENERATION_LIMIT_PER_HOUR = 2
 - Workflow navigation is sequential: Parameters requires a selected sound, and
   Listen & export requires a successful generation response. Changing the sound
   selection invalidates the generated-beat navigation state.
+- Entering Parameters classifies any selected sound without a current category.
+  All classification calls must succeed before navigation; failures keep the
+  user on Sounds for retry. Categories are session-scoped to the current beat,
+  and manual overrides invalidate any previously generated beat.
 - Guests may browse public sounds, select 1–4 sounds, generate, poll, and listen.
   Private sounds, recording, reporting, Profile, and downloads require sign-in.
 - After OAuth, the app returns to the beat and claims it before enabling direct
@@ -89,8 +99,9 @@ export const GUEST_GENERATION_LIMIT_PER_HOUR = 2
   then sends only that clipped blob through the signed-upload contract above.
   Since the uploaded file begins at the selection boundary, its trim metadata is
   normalized to zero through the clipped duration.
-- Beat generation sends only tempo/speed, genre, selected sound IDs, and an
-  optional title. Unsupported length and advanced controls are not shown.
+- Beat generation sends tempo/speed, genre, an optional title, and one of
+  `percussion`, `rhythmic`, `melodic`, `ambient`, or `transition` for every
+  selected sound. Unsupported length and advanced controls are not shown.
 
 ## Leftover files
 

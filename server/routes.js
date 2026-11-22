@@ -9,6 +9,7 @@ import { BEAT_BUCKET } from './worker.js'
 const MIN_SPEED = 60                       // slowest beat (BPM)
 const MAX_SPEED = 200                      // fastest beat (BPM)
 const MAX_SOUNDS_PER_BEAT = 4              // "No more than 4 sounds can be added to a beat"
+const SOUND_CATEGORIES = ['percussion', 'rhythmic', 'melodic', 'ambient', 'transition']
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024  // 10 MB per recording
 const SIGNED_URL_SECONDS = 60 * 60         // playback links work for 1 hour
 const DOWNLOAD_LINK_SECONDS = 5 * 60       // download links work for 5 minutes
@@ -89,9 +90,9 @@ async function findOwnSound(db, user, soundId, action) {
   return sound
 }
 
-// "sounds_beats ( sound_id )" = also fetch which sounds are linked to each beat
+// Fetch the sound/category pairs that the generation worker consumes.
 const BEAT_COLUMNS =
-  'id, user_id, title, speed, genre, visibility, status, error_message, output_path, duration_in_ms, created_at, sounds_beats ( sound_id )'
+  'id, user_id, title, speed, genre, visibility, status, error_message, output_path, duration_in_ms, created_at, sounds_beats ( sound_id, category )'
 
 function toBeatDto(row) {
   return {
@@ -104,7 +105,7 @@ function toBeatDto(row) {
     status: row.status,
     error: row.error_message ?? undefined,
     duration_seconds: row.duration_in_ms == null ? undefined : row.duration_in_ms / 1000,
-    sound_ids: row.sounds_beats.map((link) => link.sound_id),  // [{ sound_id: 'a' }] -> ['a']
+    sounds: row.sounds_beats.map((link) => ({ sound_id: link.sound_id, category: link.category })),
     created_at: row.created_at,
   }
 }
@@ -384,8 +385,12 @@ const routes = {
     if (soundIds.length > MAX_SOUNDS_PER_BEAT) {
       throw new HttpError(400, `A beat can use at most ${MAX_SOUNDS_PER_BEAT} sounds`)
     }
+    const soundIds = sounds.map((sound) => sound?.sound_id)
     if (new Set(soundIds).size !== soundIds.length) {
-      throw new HttpError(400, 'Each sound can only be used once per beat') 
+      throw new HttpError(400, 'Each sound can only be used once per beat')
+    }
+    if (sounds.some((sound) => !SOUND_CATEGORIES.includes(sound?.category))) {
+      throw new HttpError(400, `Each sound needs a category: ${SOUND_CATEGORIES.join(', ')}`)
     }
     if (!Number.isInteger(body.speed) || body.speed < MIN_SPEED || body.speed > MAX_SPEED) {
       throw new HttpError(400, `speed must be a whole number from ${MIN_SPEED} to ${MAX_SPEED}`)
